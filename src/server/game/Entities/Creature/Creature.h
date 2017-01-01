@@ -163,7 +163,7 @@ struct TC_GAME_API CreatureTemplate
 
     bool IsTameable(bool canTameExotic) const
     {
-        if (type != CREATURE_TYPE_BEAST || family == CREATURE_FAMILY_NONE || (type_flags & CREATURE_TYPE_FLAG_TAMEABLE_PET) == 0)
+        if (family == CREATURE_FAMILY_NONE || (type_flags & CREATURE_TYPE_FLAG_TAMEABLE_PET) == 0)
             return false;
 
         // if can tame exotic then can tame any tameable

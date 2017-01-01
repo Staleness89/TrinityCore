@@ -108,6 +108,7 @@ void AddSC_thousand_needles();
 void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
+void AddSC_kezan();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -204,5 +205,6 @@ void AddKalimdorScripts()
     AddSC_thousand_needles();
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
-    AddSC_winterspring();
+	AddSC_winterspring();
+	AddSC_kezan();
 }

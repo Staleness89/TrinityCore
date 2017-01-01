@@ -1966,6 +1966,13 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                             case RACE_NIGHTELF:
                                 target->SetDisplayId(target->getGender() == GENDER_FEMALE ? 10144 : 10143);
                                 break;
+							// Goblin
+							case RACE_GOBLIN:
+								target->SetDisplayId(target->getGender() == GENDER_FEMALE ? 38216 : 33486);
+								// Worgen
+							case RACE_FEL_ORC:
+								target->SetDisplayId(target->getGender() == GENDER_FEMALE ? 35997 : 37455);
+								break;
                             default:
                                 break;
                         }
@@ -2025,6 +2032,13 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                             case RACE_NIGHTELF:
                                 target->SetDisplayId(target->getGender() == GENDER_MALE ? 25038 : 25049);
                                 break;
+							case RACE_GOBLIN:
+								target->SetDisplayId(target->getGender() == GENDER_MALE ? 25036 : 25047);
+								break;
+								// Worgen
+							case RACE_FEL_ORC:
+								target->SetDisplayId(target->getGender() == GENDER_MALE ? 37543 : 37542);
+								break;
                             default:
                                 break;
                         }
@@ -2047,6 +2061,9 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     case 75531:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31654 : 31655);
                         break;
+					// Gilnean Transform
+					case 150143:
+						target->SetDisplayId(target->getGender() == GENDER_MALE ? 37101 : 37105);
                     default:
                         break;
                 }
@@ -2573,6 +2590,12 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
             else
                 creatureEntry = 15665;
         }
+
+		// Sandstone Drake
+		if (target->HasAura(93326))
+		{
+			creatureEntry = -1;
+		}
 
         if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(creatureEntry))
         {
@@ -5108,7 +5131,28 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
                     target->RemoveAurasDueToSpell(52179);
                 break;
-            }
+			}
+			if (GetId() == 98007) // Spirit Link
+			{
+				if (caster->GetOwner())
+				{
+					if (Player* _player = caster->GetOwner()->ToPlayer())
+					{
+						std::list<Unit*> memberList;
+						_player->GetPartyMembers(memberList);
+
+						float totalRaidHealthPct = 0;
+
+						for (auto itr : memberList)
+							totalRaidHealthPct += itr->GetHealthPct();
+
+						totalRaidHealthPct /= memberList.size() * 100.0f;
+
+						for (auto itr : memberList)
+							itr->SetHealth(uint32(totalRaidHealthPct * itr->GetMaxHealth()));
+						}
+				}
+			}
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             switch (GetId())

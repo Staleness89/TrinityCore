@@ -5870,10 +5870,10 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 
 void Player::UpdateWeaponSkill(WeaponAttackType attType)
 {
-    // no skill gain in pvp
+    // no skill gain in pvp EDIT: commented out
     Unit* victim = GetVictim();
-    if (victim && victim->GetTypeId() == TYPEID_PLAYER)
-        return;
+  /*if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+        return; */
 
     if (IsInFeralForm())
         return;                                             // always maximized SKILL_FERAL_COMBAT in fact
@@ -5929,8 +5929,8 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
         return;
 
     float chance = float(3 * lvldif * skilldif) / plevel;
-    if (!defense)
-        if (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)
+  /*  if (!defense)  edit: may not be blizzlike
+        if (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)   edit: pretty sure all classes benefit from intellect for weapon skills though*/
             chance += chance * 0.02f * GetStat(STAT_INTELLECT);
 
     chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%

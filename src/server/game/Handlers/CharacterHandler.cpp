@@ -1729,7 +1729,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             case RACE_TAUREN:
             case RACE_UNDEAD_PLAYER:
             case RACE_TROLL:
-            case RACE_BLOODELF:
+			case RACE_BLOODELF:
+			case RACE_GOBLIN:
                 team = TEAM_HORDE;
                 break;
             default:
@@ -1785,7 +1786,13 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
                     break;
                 case RACE_BLOODELF:
                     stmt->setUInt16(1, 137);
-                    break;
+					break;
+				case RACE_GOBLIN:
+					stmt->setUInt16(1, 792);
+					break;
+				case RACE_FEL_ORC:
+					stmt->setUInt16(1, 791);
+					break;
             }
 
             trans->Append(stmt);

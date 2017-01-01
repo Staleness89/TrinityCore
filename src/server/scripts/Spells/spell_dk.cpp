@@ -90,7 +90,8 @@ enum DeathKnightSpells
     SPELL_DK_RUNIC_RETURN                       = 61258,
     SPELL_DK_WANDERING_PLAGUE_DAMAGE            = 50526,
     SPELL_DK_DEATH_COIL_R1                      = 47541,
-    SPELL_DK_DEATH_GRIP_INITIAL                 = 49576
+    SPELL_DK_DEATH_GRIP_INITIAL                 = 49576,
+	SPELL_DK_RUNIC_EMPOWERMENT                  = 81229
 };
 
 enum DeathKnightSpellIcons
@@ -3031,6 +3032,97 @@ public:
     }
 };
 
+// Called by Death Coil (damage) - 47632, Frost Strike - 49143 and Runic Strike - 56815
+// Runic Empowerment - 81229
+class spell_dk_runic_empowerment : public SpellScriptLoader
+{
+public:
+	spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment") { }
+
+	class spell_dk_runic_empowerment_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_dk_runic_empowerment_SpellScript);
+
+		void HandleOnHit()
+		{
+			if (Player* player = GetCaster()->ToPlayer())
+			{
+				if (player->HasAura(SPELL_DK_RUNIC_EMPOWERMENT))
+				{
+					if (roll_chance_i(45))
+					{
+						std::set<uint8> runes;
+						for (uint8 i = 0; i < MAX_RUNES; i++)
+							if (player->GetRuneCooldown(i) == player->GetRuneBaseCooldown(i))
+								runes.insert(i);
+						if (!runes.empty())
+						{
+							std::set<uint8>::iterator itr = runes.begin();
+							std::advance(itr, urand(0, runes.size() - 1));
+							player->SetRuneCooldown((*itr), 0);
+							player->ResyncRunes(MAX_RUNES);
+							TC_LOG_INFO("Spells", "Spell is working!");
+						}
+					}
+				}
+			}
+		}
+
+		void Register()
+		{
+			OnHit += SpellHitFn(spell_dk_runic_empowerment_SpellScript::HandleOnHit);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_dk_runic_empowerment_SpellScript();
+	}
+};
+
+// Called by Death Coil (damage) - 47632, Frost Strike - 49143 and Runic Strike - 56815
+/* Runic Corruption - 51462 UNDONE
+class spell_dk_runic_corruption : public SpellScriptLoader
+{
+public:
+spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption") { }
+
+class spell_dk_runic_corruption_SpellScript : public SpellScript
+{
+PrepareSpellScript(spell_dk_runic_corruption_SpellScript);
+
+void HandleOnHit()
+{
+if (Player* player = GetCaster()->ToPlayer())
+{
+if (Aura* a runicCorruption = player->GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 4068, 0))
+{
+if (roll_chance_i(45))
+{
+int32 basepoints0 = runicCorruption->GetAmount();
+if (AuraPtr aur = player->GetAura(DK_SPELL_RUNIC_CORRUPTION_REGEN))
+aur->SetDuration(aur->GetDuration() + 3000);
+else
+player->CastCustomSpell(player, DK_SPELL_RUNIC_CORRUPTION_REGEN, &basepoints0, NULL, NULL, true);
+}
+}
+}
+}
+
+void Register()
+{
+OnHit += SpellHitFn(spell_dk_runic_corruption_SpellScript::HandleOnHit);
+}
+};
+
+SpellScript* GetSpellScript() const
+{
+return new spell_dk_runic_corruption_SpellScript();
+}
+};
+
+*/
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_acclimation();
@@ -3085,4 +3177,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_raise_ally_initial();
     new spell_dk_raise_ally();
     new spell_dk_ghoul_thrash();
+	new spell_dk_runic_empowerment();
 }

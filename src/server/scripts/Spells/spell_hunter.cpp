@@ -63,10 +63,10 @@ enum HunterSpells
     SPELL_HUNTER_LOCK_AND_LOAD_TRIGGER              = 56453,
     SPELL_HUNTER_LOCK_AND_LOAD_MARKER               = 67544,
     SPELL_HUNTER_KILL_COMMAND_HUNTER                = 34027,
-    SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA            = 34720,
+    SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY            = 34720,
     SPELL_REPLENISHMENT                             = 57669,
-    SPELL_HUNTER_RAPID_RECUPERATION_MANA_R1         = 56654,
-    SPELL_HUNTER_RAPID_RECUPERATION_MANA_R2         = 58882,
+    SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1         = 56654,
+    SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2         = 58882,
     SPELL_HUNTER_GLYPH_OF_MEND_PET_HAPPINESS        = 57894
 };
 
@@ -143,13 +143,13 @@ class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
             {
                 PreventDefaultAction();
 
-                uint32 maxMana = GetTarget()->GetMaxPower(POWER_MANA);
-                int32 mana = CalculatePct(maxMana, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
+                uint32 maxEnergy = GetTarget()->GetMaxPower(POWER_ENERGY);
+                int32 energy = CalculatePct(maxEnergy, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
 
                 if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
-                    AddPct(mana, glyph->GetAmount());
+                    AddPct(energy, glyph->GetAmount());
 
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, NULL, aurEff);
+                GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, energy, GetTarget(), true, NULL, aurEff);
             }
 
             void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -232,21 +232,13 @@ class spell_hun_chimera_shot : public SpellScriptLoader
                                 basePoint *= aurEff->GetTotalTicks();
                                 ApplyPct(basePoint, 40);
                             }
-                            // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
+                            // Viper Sting - Instantly restores energy to you equal to 60% of TOTAL ENERGY.!
                             else if (familyFlag[1] & 0x00000080)
                             {
                                 spellId = SPELL_HUNTER_CHIMERA_SHOT_VIPER;
 
-                                // % of mana drained in max duration
-                                basePoint = aurEff->GetAmount() * aurEff->GetTotalTicks();
-
-                                // max value
-                                int32 maxManaReturn = CalculatePct(static_cast<int32>(caster->GetMaxPower(POWER_MANA)), basePoint * 2);
-                                ApplyPct(basePoint, unitTarget->GetMaxPower(POWER_MANA));
-                                if (basePoint > maxManaReturn)
-                                    basePoint = maxManaReturn;
-
-                                ApplyPct(basePoint, 60);
+								basePoint = caster->GetMaxPower(POWER_ENERGY);
+                                ApplyPct(basePoint, 100);
                             }
                             // Scorpid Sting - Attempts to Disarm the target for 10 sec. This effect cannot occur more than once per 1 minute.
                             else if (familyFlag[0] & 0x00008000)
@@ -413,10 +405,10 @@ class spell_hun_glyph_of_arcane_shot : public SpellScriptLoader
                 if (!procSpell)
                     return;
 
-                int32 mana = procSpell->CalcPowerCost(GetTarget(), procSpell->GetSchoolMask());
-                ApplyPct(mana, aurEff->GetAmount());
+                int32 energy = procSpell->CalcPowerCost(GetTarget(), procSpell->GetSchoolMask());
+                ApplyPct(energy, aurEff->GetAmount());
 
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_GLYPH_OF_ARCANE_SHOT, SPELLVALUE_BASE_POINT0, mana, GetTarget());
+                GetTarget()->CastCustomSpell(SPELL_HUNTER_GLYPH_OF_ARCANE_SHOT, SPELLVALUE_BASE_POINT0, energy, GetTarget());
             }
 
             void Register() override
@@ -1068,9 +1060,9 @@ class spell_hun_rapid_recuperation : public SpellScriptLoader
                 PreventDefaultAction();
 
                 Unit* target = GetTarget();
-                uint32 mana = CalculatePct(target->GetMaxPower(POWER_MANA), aurEff->GetAmount());
+                uint32 energy = CalculatePct(target->GetMaxPower(POWER_ENERGY), aurEff->GetAmount());
 
-                target->CastCustomSpell(GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, SPELLVALUE_BASE_POINT0, int32(mana), target, true, nullptr, aurEff);
+                target->CastCustomSpell(GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, SPELLVALUE_BASE_POINT0, int32(energy), target, true, nullptr, aurEff);
             }
 
             void Register() override
@@ -1097,8 +1089,8 @@ class spell_hun_rapid_recuperation_trigger : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_MANA_R1) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_MANA_R2))
+                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2))
                     return false;
                 return true;
             }
@@ -1116,7 +1108,7 @@ class spell_hun_rapid_recuperation_trigger : public SpellScriptLoader
 
             void HandleRapidKillingProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
-                static uint32 const triggerSpells[2] = { SPELL_HUNTER_RAPID_RECUPERATION_MANA_R1, SPELL_HUNTER_RAPID_RECUPERATION_MANA_R2 };
+                static uint32 const triggerSpells[2] = { SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1, SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2 };
 
                 PreventDefaultAction();
 
@@ -1429,7 +1421,7 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA))
+                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY))
                     return false;
                 return true;
             }
@@ -1450,7 +1442,7 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
                     if (AuraEffect const* explosiveShot = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_AURA_PERIODIC_DUMMY, SPELLFAMILY_HUNTER, 0x00000000, 0x80000000, 0x00000000, caster->GetGUID()))
                     {
                         // due to Lock and Load SpellInfo::CalcPowerCost might return 0, so just calculate it manually
-                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetCreateMana(), explosiveShot->GetSpellInfo()->ManaCostPercentage)), aurEff->GetAmount());
+                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetMaxPower(POWER_ENERGY), explosiveShot->GetSpellInfo()->ManaCostPercentage)), aurEff->GetAmount());
                         amount /= explosiveShot->GetSpellInfo()->GetMaxTicks();
                     }
                 }
@@ -1460,7 +1452,7 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
                 if (!amount)
                     return;
 
-                caster->CastCustomSpell(SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA, SPELLVALUE_BASE_POINT0, amount, (Unit*)nullptr, true, nullptr, aurEff);
+                caster->CastCustomSpell(SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY, SPELLVALUE_BASE_POINT0, amount, (Unit*)nullptr, true, nullptr, aurEff);
             }
 
             void Register() override

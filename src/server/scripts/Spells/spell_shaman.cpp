@@ -84,7 +84,10 @@ enum ShamanSpells
     SPELL_SHAMAN_SHAMANISTIC_RAGE_PROC          = 30824,
     SPELL_SHAMAN_MAELSTROM_POWER                = 70831,
     SPELL_SHAMAN_T10_ENHANCEMENT_4P_BONUS       = 70832,
-    SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1    = 51554
+    SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1    = 51554,
+    SPELL_SHA_EARTHQUAKE                        = 61882,
+    SPELL_SHA_EARTHQUAKE_TICK                   = 77478,
+    SPELL_SHA_EARTHQUAKE_KNOCKING_DOWN          = 77505
 };
 
 enum ShamanSpellIcons
@@ -2296,6 +2299,127 @@ class spell_sha_windfury_weapon : public SpellScriptLoader
         }
 };
 
+// Spirit Link - 98020 : triggered by 98017
+// Spirit Link Totem
+class spell_sha_spirit_link : public SpellScriptLoader
+{
+public:
+	spell_sha_spirit_link() : SpellScriptLoader("spell_sha_spirit_link") { }
+
+	class spell_sha_spirit_link_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_sha_spirit_link_SpellScript);
+
+		void HandleAfterCast()
+		{
+			if (Unit* caster = GetCaster())
+			{
+				if (caster->GetEntry() == 53006)
+				{
+					if (caster->GetOwner())
+					{
+						if (Player* _player = caster->GetOwner()->ToPlayer())
+						{
+							std::list<Unit*> memberList;
+							_player->GetPartyMembers(memberList);
+
+							float totalRaidHealthPct = 0;
+
+							for (auto itr : memberList)
+								totalRaidHealthPct += itr->GetHealthPct();
+
+							totalRaidHealthPct /= memberList.size() * 100.0f;
+
+							for (auto itr : memberList)
+								itr->SetHealth(uint32(totalRaidHealthPct * itr->GetMaxHealth()));
+						}
+					}
+				}
+			}
+		}
+
+		void Register()
+		{
+			AfterCast += SpellCastFn(spell_sha_spirit_link_SpellScript::HandleAfterCast);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_sha_spirit_link_SpellScript();
+	}
+};
+
+// Earthquake : Ticks - 77478
+class spell_sha_earthquake_tick : public SpellScriptLoader
+{
+public:
+	spell_sha_earthquake_tick() : SpellScriptLoader("spell_sha_earthquake_tick") { }
+
+	class spell_sha_earthquake_tick_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_sha_earthquake_tick_SpellScript);
+
+		bool Validate(SpellInfo const* /*spell*/)
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_SHA_EARTHQUAKE_TICK))
+				return false;
+			return true;
+		}
+
+		void HandleOnHit()
+		{
+			// With a 10% chance of knocking down affected targets
+			if (Player* _player = GetCaster()->ToPlayer())
+				if (Unit* target = GetHitUnit())
+					if (roll_chance_i(10))
+						_player->CastSpell(target, SPELL_SHA_EARTHQUAKE_KNOCKING_DOWN, true);
+		}
+
+		void Register()
+		{
+			OnHit += SpellHitFn(spell_sha_earthquake_tick_SpellScript::HandleOnHit);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_sha_earthquake_tick_SpellScript();
+	}
+};
+
+/* Earthquake - 61882
+class spell_sha_earthquake : public SpellScriptLoader
+{
+public:
+	spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
+
+	class spell_sha_earthquake_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_sha_earthquake_AuraScript);
+
+		void OnTick(AuraEffect aurEff)
+		{
+			if (!GetCaster())
+				return;
+
+			if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHA_EARTHQUAKE))
+				GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHA_EARTHQUAKE_TICK, true);
+		}
+
+		void Register()
+		{
+			OnEffectPeriodic += AuraEffectFn(spell_sha_earthquake_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+		}
+	};
+
+	AuraScript* GetAuraScript() const
+	{
+		return new spell_sha_earthquake_AuraScript();
+	}
+};
+*/
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening();
@@ -2344,4 +2468,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_t10_elemental_4p_bonus();
     new spell_sha_t10_restoration_4p_bonus();
     new spell_sha_windfury_weapon();
+	new spell_sha_earthquake_tick();
+//	new spell_sha_earthquake();
+	new spell_sha_spirit_link();
 }
