@@ -191,13 +191,16 @@ public:
 		float y = targetPos.GetPositionY();
 		float z = targetPos.GetPositionZ();
 		float angle = location->GetAngle(x, y);
+		G3D::Quat rotation;
 		float orientation = owner->GetOrientation();
 
-		if (!object->Create(guidLow, objectInfo->entry, map, 1, x, y, z, orientation, 0, 0, 0, 0, 0, GO_STATE_READY))
+		/*
+		if (!object->Create(guidLow, objectInfo->entry, map, 1, targetPos, rotation, 0, GO_STATE_READY, 0))
 		{
 			delete object;
 			return nullptr;
 		}
+		*/
 
 		object->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), owner->GetPhaseMask());
 		guidLow = object->GetSpawnId();

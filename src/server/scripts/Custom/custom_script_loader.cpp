@@ -17,17 +17,11 @@
 
 // This is where scripts' loading functions should be declared:
 
-<<<<<<< HEAD
 void AddSC_building_system();
-=======
->>>>>>> 3d3d0492ab8dad40d5590e80f45bdfbdbcbe7497
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
-<<<<<<< HEAD
-	AddSC_building_system();
-=======
->>>>>>> 3d3d0492ab8dad40d5590e80f45bdfbdbcbe7497
+    AddSC_building_system();
 }
