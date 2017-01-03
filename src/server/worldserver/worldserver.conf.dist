@@ -2197,8 +2197,8 @@ SkillGain.Weapon    = 1
 
 SkillChance.Orange = 100
 SkillChance.Yellow = 75
-SkillChance.Green  = 25
-SkillChance.Grey   = 0
+SkillChance.Green  = 50
+SkillChance.Grey   = 1
 
 #
 #    SkillChance.MiningSteps
@@ -2216,7 +2216,7 @@ SkillChance.SkinningSteps = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-DurabilityLoss.InPvP = 0
+DurabilityLoss.InPvP = 1
 
 #
 #    DurabilityLoss.OnDeath
@@ -2266,7 +2266,7 @@ DurabilityLossChance.Block = 0.05
 #                     MaxPlayerLevel+1 - (Disabled)
 #                     -10              - (Enabled, Level 1+ characters have 10 minute duration)
 
-Death.SicknessLevel = 11
+Death.SicknessLevel = 1
 
 #
 #    Death.CorpseReclaimDelay.PvP
@@ -2430,7 +2430,7 @@ Battleground.PremadeGroupWaitForMatch = 1800000
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Battleground.GiveXPForKills = 0
+Battleground.GiveXPForKills = 1
 
 #
 #    Battleground.Random.ResetHour
@@ -2841,7 +2841,7 @@ PlayerStart.AllSpells = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-PlayerStart.MapsExplored = 0
+PlayerStart.MapsExplored = 1
 
 #
 #    HonorPointsAfterDuel
@@ -2849,7 +2849,7 @@ PlayerStart.MapsExplored = 0
 #        Default:     0  - (Disabled)
 #                     1+ - (Enabled)
 
-HonorPointsAfterDuel = 0
+HonorPointsAfterDuel = 10
 
 #
 #    ResetDuelCooldowns
