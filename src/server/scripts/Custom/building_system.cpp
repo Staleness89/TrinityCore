@@ -33,8 +33,11 @@ enum Ranges
 	RANGE_BASE_SUCCESS_MUSIC = 12,
 };
 
-//Written by Fractional @Ac-web.org
-//Video showcase: https://www.youtube.com/watch?v=bVlLA-dB5Pc
+/*
+Written by Fractional @Ac-web.org
+Video showcase: https://www.youtube.com/watch?v=bVlLA-dB5Pc
+edits by Staleness
+*/
 
 class BuildingSystem
 {
@@ -42,7 +45,7 @@ public:
 	class PlayerBase
 	{
 	public:
-		int guildid;
+		int playerguid;
 		int flagguid;
 		float x;
 		float y;
@@ -51,20 +54,20 @@ public:
 
 	static void createDatabaseEntry(PlayerBase* base)
 	{
-		WorldDatabase.PExecute("INSERT INTO custom_building_system_bases (guildid, flagguid, x, y,z) VALUES (%i, %i, %f, %f, %f)", base->guildid, base->flagguid, base->x, base->y, base->z);
+		WorldDatabase.PExecute("INSERT INTO building_system_bases (playerguid, flagguid, x, y,z) VALUES (%i, %i, %f, %f, %f)", base->playerguid, base->flagguid, base->x, base->y, base->z);
 	}
 
 	static std::list<PlayerBase> getPlayerBases()
 	{
 		std::list<PlayerBase> playerBases;
 
-		QueryResult result = WorldDatabase.PQuery("SELECT * FROM custom_building_system_bases");
+		QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases");
 		if (!result) return playerBases;
 
 		do {
 			Field* fields = result->Fetch();
 
-			int guildid = fields[0].GetInt32();
+			int playerguid = fields[0].GetInt32();
 			int flagguid = fields[1].GetInt32();
 			float x = fields[2].GetFloat();
 			float y = fields[3].GetFloat();
@@ -72,7 +75,7 @@ public:
 
 			PlayerBase base;
 
-			base.guildid = guildid;
+			base.playerguid = playerguid;
 			base.flagguid = flagguid;
 			base.x = x;
 			base.y = y;
@@ -160,9 +163,9 @@ public:
 		return xDiff + yDiff + zDiff;
 	}
 
-	static bool isWithinBaseArea(float x, float y, float z, int guildid)
+	static bool isWithinBaseArea(float x, float y, float z, int playerguid)
 	{
-		QueryResult result = WorldDatabase.PQuery("SELECT * FROM custom_building_system_bases WHERE guildid=%i", guildid);
+		QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases WHERE playerguid=%i", playerguid);
 		if (!result) return false;
 
 		Field* fields = result->Fetch();
@@ -190,17 +193,14 @@ public:
 		float x = targetPos.GetPositionX();
 		float y = targetPos.GetPositionY();
 		float z = targetPos.GetPositionZ();
-		float angle = location->GetAngle(x, y);
-		G3D::Quat rotation;
-		float orientation = owner->GetOrientation();
 
-		/*
-		if (!object->Create(guidLow, objectInfo->entry, map, 1, targetPos, rotation, 0, GO_STATE_READY, 0))
+		G3D::Quat rot = G3D::Matrix3::fromEulerAnglesZYX(owner->GetOrientation(), 0.f, 0.f);
+
+		if (!object->Create(guidLow, objectInfo->entry, map, owner->GetPhaseMask(), Position(x, y, z, owner->GetOrientation()), rot, 255, GO_STATE_READY))
 		{
 			delete object;
 			return nullptr;
 		}
-		*/
 
 		object->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), owner->GetPhaseMask());
 		guidLow = object->GetSpawnId();
@@ -225,9 +225,9 @@ class PlayerBaseClaimer
 public:
 	static bool canClaimBase(Player* player, const WorldLocation* location)
 	{
-		if (playerGuildHasBase(player))
+		if (playerHasBase(player))
 		{
-			player->GetSession()->SendAreaTriggerMessage("Your guild already have a base");
+			player->GetSession()->SendAreaTriggerMessage("You already have a base");
 			return false;
 		}
 
@@ -258,20 +258,18 @@ public:
 	}
 
 private:
-	static bool playerGuildHasBase(Player* player)
+	static bool playerHasBase(Player* player)
 	{
-		if (player->GetGuild() == nullptr) return false;
-
-		QueryResult result = WorldDatabase.PQuery("SELECT * FROM custom_building_system_bases");
+		QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases");
 		if (!result) return false;
 
 		do {
 			Field* fields = result->Fetch();
 
-			int guildid = fields[0].GetInt32();
+			int playerguid = fields[0].GetInt32();
 			int flagguid = fields[1].GetInt32();
 
-			if (guildid == player->GetGuildId())
+			if (playerguid == player->GetGUID())
 				return true;
 
 		} while (result->NextRow());
@@ -328,13 +326,13 @@ public:
 	private:
 		void onPlayerEnter(Player* player)
 		{
-			std::string enterMessage = "You're entering " + getGuildNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
+			std::string enterMessage = "You're entering " + getPlayerNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
 			player->GetSession()->SendAreaTriggerMessage(enterMessage.c_str());
 		}
 
 		void onPlayerLeave(Player* player)
 		{
-			std::string leaveMessage = "You're leaving " + getGuildNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
+			std::string leaveMessage = "You're leaving " + getPlayerNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
 			player->GetSession()->SendAreaTriggerMessage(leaveMessage.c_str());
 		}
 
@@ -375,22 +373,22 @@ public:
 			return result != nullptr ? true : false;
 		}
 
-		std::string getGuildNameFromFlagGUID(int flagguid)
+		std::string getPlayerNameFromFlagGUID(int flagguid)
 		{
-			std::string guildName = "";
-			QueryResult result = WorldDatabase.PQuery("SELECT * FROM custom_building_system_bases WHERE flagguid=%u", flagguid);
-			if (!result) return guildName;
+			std::string playerName = "";
+			QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases WHERE flagguid=%u", flagguid);
+			if (!result) return playerName;
 
 			Field* fields = result->Fetch();
-			int guildid = fields[0].GetInt32();
+			int playerguid = fields[0].GetInt32();
 
-			QueryResult result2 = CharacterDatabase.PQuery("SELECT name FROM guild WHERE guildid=%u", guildid);
-			if (!result2) return guildName;
+			QueryResult result2 = CharacterDatabase.PQuery("SELECT name FROM characters WHERE guid=%u", playerguid);
+			if (!result2) return playerName;
 
 			fields = result2->Fetch();
-			guildName = fields[0].GetString();
+			playerName = fields[0].GetString();
 
-			return guildName;
+			return playerName;
 		}
 	};
 
@@ -429,7 +427,7 @@ public:
 
 			Player* player = (Player*)GetCaster();
 
-			BuildingSystem::PlayerBase base = buildBase(player->GetGuildId(), flag->GetSpawnId(), GetExplTargetDest());
+			BuildingSystem::PlayerBase base = buildBase(player->GetGUID(), flag->GetSpawnId(), GetExplTargetDest());
 			BuildingSystem::createDatabaseEntry(&base);
 
 			GetCaster()->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
@@ -444,11 +442,11 @@ public:
 
 	private:
 
-		BuildingSystem::PlayerBase buildBase(int guildid, int flagguid, const WorldLocation* location)
+		BuildingSystem::PlayerBase buildBase(int playerguid, int flagguid, const WorldLocation* location)
 		{
 			BuildingSystem::PlayerBase base;
 
-			base.guildid = guildid;
+			base.playerguid = playerguid;
 			base.flagguid = flagguid;
 			base.x = location->GetPositionX();
 			base.y = location->GetPositionY();
@@ -462,9 +460,6 @@ public:
 			const SpellInfo* info = GetSpellInfo();
 			uint32 objectEntry = info->Effects[0].MiscValue;
 			GameObject* flag = ObjectSpawner::spawnPermanent(objectEntry, GetCaster(), GetExplTargetDest());
-
-			auto ai = dynamic_cast<gameobject_building_flag::gameobject_building_flagAI*>(flag->AI());
-			ai->existsInDB = true;
 
 			return flag;
 		}
@@ -509,16 +504,10 @@ public:
 			Player* player = (Player*)GetCaster();
 			if (!player) return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
-			if (!player->GetGuild())
-			{
-				player->GetSession()->SendAreaTriggerMessage("You need to be a member of a guild in order to build");
-				return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-			}
-
 			const WorldLocation* loc = GetExplTargetDest();
-			if (!WorldHelper::isWithinBaseArea(loc->GetPositionX(), loc->GetPositionY(), loc->GetPositionZ(), player->GetGuildId()))
+			if (!WorldHelper::isWithinBaseArea(loc->GetPositionX(), loc->GetPositionY(), loc->GetPositionZ(), player->GetGUID()))
 			{
-				player->GetSession()->SendAreaTriggerMessage("The target location is not within your guild's territory");
+				player->GetSession()->SendAreaTriggerMessage("The target location is not within your territory");
 				return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 			}
 
@@ -531,7 +520,6 @@ public:
 			const SpellInfo* info = GetSpellInfo();
 			uint32 objectEntry = info->Effects[0].MiscValue;
 
-			GetCaster()->Say(std::to_string(objectEntry), LANG_COMMON);
 			ObjectSpawner::spawnPermanent(objectEntry, GetCaster(), GetExplTargetDest());
 		}
 
