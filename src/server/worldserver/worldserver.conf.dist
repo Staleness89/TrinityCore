@@ -1911,10 +1911,10 @@ GM.ForceShutdownThreshold = 30
 #    Visibility.GroupMode
 #        Description: Group visibility modes. Defines which groups can aways detect invisible
 #                     characters of the same raid, group or faction.
-#        Default:     2 - (Raid)
+#        Default:     1 - (Raid)
 #                     0 - (Party)
-#                     1 - (None)
-#                     3 - (Faction)
+#                     2 - (Faction)
+#                     3 - (None)
 
 Visibility.GroupMode = 1
 
