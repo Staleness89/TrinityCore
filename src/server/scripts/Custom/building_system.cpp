@@ -11,26 +11,15 @@
 
 #include <algorithm>
 
-enum Creatures
-{
-	CREATURE_FLAG_EFFECT = 97000,
-};
-
 enum Gameobjects
 {
 	GAMEOBJECT_BASE_FLAG = 532852,
-};
-
-enum Sounds
-{
-	SOUND_FLAG_SPAWN = 11705,
 };
 
 enum Ranges
 {
 	//Area sizes in yards
 	RANGE_BASE = 25,
-	RANGE_BASE_SUCCESS_MUSIC = 12,
 };
 
 /*
@@ -61,7 +50,7 @@ public:
 	{
 		std::list<PlayerBase> playerBases;
 
-		QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases");
+		QueryResult result = WorldDatabase.Query("SELECT * FROM building_system_bases");
 		if (!result) return playerBases;
 
 		do {
@@ -226,18 +215,13 @@ public:
 	static bool canClaimBase(Player* player, const WorldLocation* location)
 	{
 		if (playerHasBase(player))
-		{
-			player->GetSession()->SendAreaTriggerMessage("You already have a base");
 			return false;
-		}
-
-		if (!isAreaFree(location))
-		{
-			player->GetSession()->SendAreaTriggerMessage("The land you are trying to claim is already occupied.");
+		else if (!isAreaFree(location))
 			return false;
-		}
-
-		return true;
+		//else if (!isAreaBuildable(player))
+		//	return false;
+		else
+			return true;
 	}
 
 	static bool isAreaFree(const WorldLocation* location)
@@ -256,11 +240,17 @@ public:
 
 		return true;
 	}
-
+/*
+	static bool isAreaBuildable(Player* player)
+	{
+		else
+			return true;
+	}
+	*/
 private:
 	static bool playerHasBase(Player* player)
 	{
-		QueryResult result = WorldDatabase.PQuery("SELECT * FROM building_system_bases");
+		QueryResult result = WorldDatabase.Query("SELECT * FROM building_system_bases");
 		if (!result) return false;
 
 		do {
@@ -410,7 +400,11 @@ public:
 		SpellCastResult CheckCast()
 		{
 			Player* player = (Player*)GetCaster();
+			const AreaTableEntry* areaId = (sAreaTableStore.LookupEntry(player->GetAreaId()));
 			if (!player) return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+			if ((sAreaTableStore.LookupEntry(player->GetAreaId()))->flags & (AREA_FLAG_CAPITAL || AREA_FLAG_CITY || AREA_FLAG_TOWN))
+				return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
 			if (!PlayerBaseClaimer::canClaimBase(player, GetExplTargetDest()))
 				return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -422,16 +416,11 @@ public:
 		{
 			GameObject* flag = spawnFlag();
 			if (!flag) return;
-
-			Creature* flagEffectCreature = spawnFlagEffectCreature();
-
+			
 			Player* player = (Player*)GetCaster();
 
 			BuildingSystem::PlayerBase base = buildBase(player->GetGUID(), flag->GetSpawnId(), GetExplTargetDest());
 			BuildingSystem::createDatabaseEntry(&base);
-
-			GetCaster()->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
-			playSuccessMusic(flag);
 		}
 
 		void Register() override
@@ -464,24 +453,6 @@ public:
 			return flag;
 		}
 
-		Creature* spawnFlagEffectCreature()
-		{
-			const Position* position = GetExplTargetDest();
-
-			float x = position->GetPositionX();
-			float y = position->GetPositionY();
-			float z = position->GetPositionZ();
-
-			return GetCaster()->SummonCreature(CREATURE_FLAG_EFFECT, x, y, z, 0.f, TEMPSUMMON_TIMED_DESPAWN, 3000);
-		}
-
-		void playSuccessMusic(GameObject* flag)
-		{
-			std::list<Player*> players = PlayerHelper::getPlayersNear(flag, RANGE_BASE_SUCCESS_MUSIC);
-
-			for (Player* player : players)
-				player->PlayDirectSound(SOUND_FLAG_SPAWN, player);
-		}
 	};
 
 	SpellScript* GetSpellScript() const override
