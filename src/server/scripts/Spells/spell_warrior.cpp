@@ -66,7 +66,9 @@ enum WarriorSpells
     SPELL_WARRIOR_SECOND_WIND_TRIGGER_2             = 29842,
     SPELL_WARRIOR_GLYPH_OF_BLOCKING                 = 58374,
     SPELL_WARRIOR_STOICISM                          = 70845,
-    SPELL_WARRIOR_T10_MELEE_4P_BONUS                = 70847
+    SPELL_WARRIOR_T10_MELEE_4P_BONUS                = 70847,
+    SPELL_WARRIOR_MORTAL_STRIKE                     = 12294,
+    SPELL_WARRIOR_REND                              = 94009,
 };
 
 enum WarriorSpellIcons
@@ -1205,6 +1207,43 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         {
             return new spell_warr_vigilance_trigger_SpellScript();
         }
+};
+
+// -84583 Lambs to the Slaughter
+class spell_warr_lambs_to_the_slaughter : public SpellScriptLoader
+{
+public:
+	spell_warr_lambs_to_the_slaughter() : SpellScriptLoader("spell_warr_lambs_to_the_slaughter") { }
+
+	class spell_warr_lambs_to_the_slaughter_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_warr_lambs_to_the_slaughter_AuraScript);
+
+		bool Validate(SpellInfo const* /*spellInfo*/) override
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_MORTAL_STRIKE) ||
+				!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_REND))
+				return false;
+			return true;
+		}
+
+		void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+		{
+			if (Aura* aur = eventInfo.GetProcTarget()->GetAura(SPELL_WARRIOR_REND, GetTarget()->GetGUID()))
+				aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
+
+		}
+
+		void Register() override
+		{
+			OnEffectProc += AuraEffectProcFn(spell_warr_lambs_to_the_slaughter_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+		}
+	};
+
+	AuraScript* GetAuraScript() const override
+	{
+		return new spell_warr_lambs_to_the_slaughter_AuraScript();
+	}
 };
 
 void AddSC_warrior_spell_scripts()
