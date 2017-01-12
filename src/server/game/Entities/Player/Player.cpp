@@ -24166,7 +24166,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
         }
         else
         {
-            m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
+            m_deathTimer = 1 * MINUTE * IN_MILLISECONDS;
 
             // Reset "Release spirit" timer clientside
             WorldPacket data(SMSG_FORCED_DEATH_UPDATE);
