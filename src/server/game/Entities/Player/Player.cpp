@@ -21688,7 +21688,7 @@ void Player::UpdatePvPState(bool onlyFFA)
     }
     else                                                    // in friendly area
     {
-        if (IsPvP() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) && !pvpInfo.EndTimer)
+        if (!sWorld->IsPvPRealm() && IsPvP() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) && !pvpInfo.EndTimer)
             pvpInfo.EndTimer = time(nullptr);                  // start toggle-off
     }
 }
