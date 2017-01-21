@@ -85,9 +85,10 @@ enum ShamanSpells
     SPELL_SHAMAN_MAELSTROM_POWER                = 70831,
     SPELL_SHAMAN_T10_ENHANCEMENT_4P_BONUS       = 70832,
     SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1    = 51554,
+	SPELL_SHAMAN_FIRE_ELEMENTAL                 = 2894,
+	SPELL_SHAMAN_FIRE_ELEMENTAL_UNBOUND         = 32983, //need to copy
     SPELL_SHA_EARTHQUAKE                        = 61882,
-    SPELL_SHA_EARTHQUAKE_TICK                   = 77478,
-    SPELL_SHA_EARTHQUAKE_KNOCKING_DOWN          = 77505
+    SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN           = 77505
 };
 
 enum ShamanSpellIcons
@@ -2350,75 +2351,92 @@ public:
 	}
 };
 
-// Earthquake : Ticks - 77478
-class spell_sha_earthquake_tick : public SpellScriptLoader
-{
-public:
-	spell_sha_earthquake_tick() : SpellScriptLoader("spell_sha_earthquake_tick") { }
-
-	class spell_sha_earthquake_tick_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_sha_earthquake_tick_SpellScript);
-
-		bool Validate(SpellInfo const* /*spell*/)
-		{
-			if (!sSpellMgr->GetSpellInfo(SPELL_SHA_EARTHQUAKE_TICK))
-				return false;
-			return true;
-		}
-
-		void HandleOnHit()
-		{
-			// With a 10% chance of knocking down affected targets
-			if (Player* _player = GetCaster()->ToPlayer())
-				if (Unit* target = GetHitUnit())
-					if (roll_chance_i(10))
-						_player->CastSpell(target, SPELL_SHA_EARTHQUAKE_KNOCKING_DOWN, true);
-		}
-
-		void Register()
-		{
-			OnHit += SpellHitFn(spell_sha_earthquake_tick_SpellScript::HandleOnHit);
-		}
-	};
-
-	SpellScript* GetSpellScript() const
-	{
-		return new spell_sha_earthquake_tick_SpellScript();
-	}
-};
-
-/* Earthquake - 61882
+// 77478 - Earthquake
 class spell_sha_earthquake : public SpellScriptLoader
 {
 public:
 	spell_sha_earthquake() : SpellScriptLoader("spell_sha_earthquake") { }
 
-	class spell_sha_earthquake_AuraScript : public AuraScript
+	class spell_sha_earthquake_SpellScript : public SpellScript
 	{
-		PrepareAuraScript(spell_sha_earthquake_AuraScript);
+		PrepareSpellScript(spell_sha_earthquake_SpellScript);
 
-		void OnTick(AuraEffect aurEff)
+		int32 chance;
+
+		bool Validate(SpellInfo const* /*spellEntry*/)
 		{
-			if (!GetCaster())
-				return;
+			if (!sSpellStore.LookupEntry(SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN))
+				return false;
+			return true;
+		}
 
-			if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHA_EARTHQUAKE))
-				GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHA_EARTHQUAKE_TICK, true);
+		bool Load()
+		{
+			chance = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+			return true;
+		}
+
+		void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+		{
+			if (roll_chance_i(chance))
+				GetCaster()->CastSpell(GetHitUnit(), SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN, true);
 		}
 
 		void Register()
 		{
-			OnEffectPeriodic += AuraEffectFn(spell_sha_earthquake_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+			OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_sha_earthquake_SpellScript();
+	}
+};
+
+class spell_sha_unbound_elements : public SpellScriptLoader
+{
+public:
+	spell_sha_unbound_elements() : SpellScriptLoader("spell_sha_unbound_elements") { }
+
+	class spell_sha_unbound_elements_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_sha_unbound_elements_AuraScript);
+
+		void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			if (Player* player = GetCaster()->ToPlayer())
+			{
+				if (player->HasActiveSpell(SPELL_SHAMAN_FIRE_ELEMENTAL))
+				{
+					player->LearnSpell(SPELL_SHAMAN_FIRE_ELEMENTAL_UNBOUND, 1);
+					player->RemoveSpell(SPELL_SHAMAN_FIRE_ELEMENTAL, true);
+
+				}
+			}
+		}
+
+		void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+		{
+			if (Player* player = GetCaster()->ToPlayer())
+			{
+				player->LearnSpell(SPELL_SHAMAN_FIRE_ELEMENTAL, 1);
+				player->RemoveSpell(SPELL_SHAMAN_FIRE_ELEMENTAL_UNBOUND);
+			}
+		}
+
+		void Register()
+		{
+			AfterEffectApply += AuraEffectRemoveFn(spell_sha_unbound_elements_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+			AfterEffectRemove += AuraEffectRemoveFn(spell_sha_unbound_elements_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
 		}
 	};
 
 	AuraScript* GetAuraScript() const
 	{
-		return new spell_sha_earthquake_AuraScript();
+		return new spell_sha_unbound_elements_AuraScript();
 	}
 };
-*/
 
 void AddSC_shaman_spell_scripts()
 {
@@ -2468,7 +2486,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_t10_elemental_4p_bonus();
     new spell_sha_t10_restoration_4p_bonus();
     new spell_sha_windfury_weapon();
-	new spell_sha_earthquake_tick();
-//	new spell_sha_earthquake();
+	new spell_sha_earthquake();
 	new spell_sha_spirit_link();
+	new spell_sha_unbound_elements();
 }

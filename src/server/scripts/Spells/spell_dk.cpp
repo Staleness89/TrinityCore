@@ -3049,8 +3049,6 @@ public:
 			{
 				if (player->HasAura(SPELL_DK_RUNIC_EMPOWERMENT))
 				{
-					if (roll_chance_i(45))
-					{
 						std::set<uint8> runes;
 						for (uint8 i = 0; i < MAX_RUNES; i++)
 							if (player->GetRuneCooldown(i) == player->GetRuneBaseCooldown(i))
@@ -3062,7 +3060,6 @@ public:
 							player->SetRuneCooldown((*itr), 0);
 							player->ResyncRunes(MAX_RUNES);
 							TC_LOG_INFO("Spells", "Spell is working!");
-						}
 					}
 				}
 			}

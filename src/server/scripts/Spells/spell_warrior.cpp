@@ -743,13 +743,9 @@ class spell_warr_rend : public SpellScriptLoader
                     float mwb = ((mwbMin + mwbMax) / 2 + ap * mws / 14000) * 0.2f;
                     amount += int32(caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), mwb));
 
-                    // "If used while your target is above 75% health, Rend does 35% more damage."
-                    // as for 3.1.3 only ranks above 9 (wrong tooltip?)
-                    if (GetSpellInfo()->GetRank() >= 9)
-                    {
-                        if (GetUnitOwner()->HasAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, GetSpellInfo(), caster))
-                            AddPct(amount, GetSpellInfo()->Effects[EFFECT_2].CalcValue(caster));
-                    }
+                // "If used while your target is above 75% health, Rend does 35% more damage."
+                    if (GetUnitOwner()->HasAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, GetSpellInfo(), caster))
+                        AddPct(amount, GetSpellInfo()->Effects[EFFECT_2].CalcValue(caster));
                 }
             }
 
@@ -1209,7 +1205,7 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         }
 };
 
-// -84583 Lambs to the Slaughter
+// -84583 Lambs to the Slaughter NEW
 class spell_warr_lambs_to_the_slaughter : public SpellScriptLoader
 {
 public:
@@ -1231,7 +1227,6 @@ public:
 		{
 			if (Aura* aur = eventInfo.GetProcTarget()->GetAura(SPELL_WARRIOR_REND, GetTarget()->GetGUID()))
 				aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
-
 		}
 
 		void Register() override
@@ -1275,4 +1270,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victorious();
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
+	new spell_warr_lambs_to_the_slaughter();
 }
