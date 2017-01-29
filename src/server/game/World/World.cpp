@@ -69,6 +69,7 @@
 #include "WeatherMgr.h"
 #include "WorldSession.h"
 #include "M2Stores.h"
+#include "WhoListStorage.h"
 
 TC_GAME_API std::atomic<bool> World::m_stopEvent(false);
 TC_GAME_API uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1878,6 +1879,8 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_CHECK_FILECHANGES].SetInterval(500);
 
+    m_timers[WUPDATE_WHO_LIST].SetInterval(5 * IN_MILLISECONDS); // update who list cache every 5 seconds
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -2107,6 +2110,13 @@ void World::Update(uint32 diff)
             m_timers[i].Update(diff);
         else
             m_timers[i].SetCurrent(0);
+    }
+
+    ///- Update Who List Storage
+    if (m_timers[WUPDATE_WHO_LIST].Passed())
+    {
+        m_timers[WUPDATE_WHO_LIST].Reset();
+        sWhoListStorageMgr->Update();
     }
 
     ///- Update the game time and check for shutdown time
@@ -3343,6 +3353,9 @@ void World::AddCharacterInfo(ObjectGuid const& guid, uint32 accountId, std::stri
     data.GuildId = 0;                           // Will be set in guild loading or guild setting
     for (uint8 i = 0; i < MAX_ARENA_SLOT; ++i)
         data.ArenaTeamId[i] = 0;                // Will be set in arena teams loading
+
+    // Fill Name to Guid Store
+    _characterGuidByNameStore[name] = guid;
 }
 
 void World::DeleteCharacterInfo(ObjectGuid const& guid, std::string const& name)
