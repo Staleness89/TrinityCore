@@ -1819,6 +1819,8 @@ bool Pet::IsPermanentPetFor(Player* owner) const
                     return GetCreatureTemplate()->type == CREATURE_TYPE_DEMON;
                 case CLASS_DEATH_KNIGHT:
                     return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
+				case CLASS_SHAMAN:
+					return GetCreatureTemplate()->type == CREATURE_TYPE_ELEMENTAL;
                 default:
                     return false;
             }
