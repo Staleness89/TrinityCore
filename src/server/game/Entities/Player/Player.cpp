@@ -1219,18 +1219,6 @@ void Player::Update(uint32 p_time)
         m_nextMailDelivereTime = 0;
     }
 
-    // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
-    // Having this would prevent more aura charges to be dropped, so let's crash
-    //ASSERT (!m_spellModTakingSpell);
-    if (m_spellModTakingSpell)
-    {
-        //TC_LOG_FATAL("entities.player", "Player has m_pad %u during update!", m_pad);
-        //if (m_spellModTakingSpell)
-        TC_LOG_FATAL("spells", "Player::Update: Player '%s' (%s) has m_spellModTakingSpell (SpellID: %u) during update!",
-            GetName().c_str(), GetGUID().ToString().c_str(), m_spellModTakingSpell->m_spellInfo->Id);
-        m_spellModTakingSpell = nullptr;
-    }
-
     // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
     _cinematicMgr->m_cinematicDiff += p_time;
     if (_cinematicMgr->m_cinematicCamera && _cinematicMgr->m_activeCinematicCameraId && GetMSTimeDiffToNow(_cinematicMgr->m_lastCinematicCheck) > CINEMATIC_UPDATEDIFF)
@@ -1929,7 +1917,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
-        SetFallInformation(0, z);
+        SetFallInformation(0, GetPositionZ());
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet MSG_MOVE_TELEPORT_ACK
@@ -2037,7 +2025,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 oldmap->RemovePlayerFromMap(this, false);
 
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
-            SetFallInformation(0, z);
+            SetFallInformation(0, GetPositionZ());
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -4711,6 +4699,9 @@ void Player::BuildPlayerRepop()
 
     // set and clear other
     SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+
+    // OnPlayerRepop hook
+    sScriptMgr->OnPlayerRepop(this);
 }
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
@@ -7069,8 +7060,13 @@ void Player::UpdateArea(uint32 newArea)
     m_areaUpdateId = newArea;
 
     AreaTableEntry const* area = sAreaTableStore.LookupEntry(newArea);
+    bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
     pvpInfo.IsInFFAPvPArea = area && (area->flags & AREA_FLAG_ARENA);
     UpdatePvPState(true);
+
+    // check if we were in ffa arena and we left
+    if (oldFFAPvPArea && !pvpInfo.IsInFFAPvPArea)
+        ValidateAttackersAndOwnTarget();
 
     UpdateAreaDependentAuras(newArea);
 
@@ -8278,7 +8274,8 @@ bool Player::CheckAmmoCompatibility(const ItemTemplate* ammo_proto) const
     Called by remove insignia spell effect    */
 void Player::RemovedInsignia(Player* looterPlr)
 {
-    if (!GetBattlegroundId())
+    // If player is not in battleground and not in wintergrasp
+    if (!GetBattlegroundId() && GetZoneId() != AREA_WINTERGRASP)
         return;
 
     // If not released spirit, do it !
@@ -8366,8 +8363,9 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     group->UpdateLooterGuid(go);
             }
 
-            if (GameObjectTemplateAddon const* addon = go->GetTemplateAddon())
-                loot->generateMoneyLoot(addon->mingold, addon->maxgold);
+            if (go->GetLootMode() > 0)
+                if (GameObjectTemplateAddon const* addon = go->GetTemplateAddon())
+                    loot->generateMoneyLoot(addon->mingold, addon->maxgold);
 
             if (loot_type == LOOT_FISHING)
                 go->getFishLoot(loot, this);
@@ -8480,14 +8478,21 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
         loot = &bones->loot;
 
-        if (!bones->lootForBody)
+        if (loot->loot_type == LOOT_NONE)
         {
-            bones->lootForBody = true;
             uint32 pLevel = bones->loot.gold;
             bones->loot.clear();
+
+            // For AV Achievement
             if (Battleground* bg = GetBattleground())
+            {
                 if (bg->GetTypeID(true) == BATTLEGROUND_AV)
-                    loot->FillLoot(1, LootTemplates_Creature, this, true);
+                    loot->FillLoot(PLAYER_CORPSE_LOOT_ENTRY, LootTemplates_Creature, this, true);
+            }
+            // For wintergrasp Quests
+            else if (GetZoneId() == AREA_WINTERGRASP)
+                loot->FillLoot(PLAYER_CORPSE_LOOT_ENTRY, LootTemplates_Creature, this, true);
+
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
             bones->loot.gold = uint32(urand(50, 150) * 0.016f * std::pow(float(pLevel) / 5.76f, 50.f) * sWorld->getRate(RATE_DROP_MONEY));
@@ -8544,6 +8549,22 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
         }
         else
         {
+            // exploit fix
+            if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+            {
+                SendLootError(guid, LOOT_ERROR_DIDNT_KILL);
+                return;
+            }
+
+            // the player whose group may loot the corpse
+            Player* recipient = creature->GetLootRecipient();
+            Group* recipientGroup = creature->GetLootRecipientGroup();
+            if (!recipient && !recipientGroup)
+            {
+                SendLootError(guid, LOOT_ERROR_DIDNT_KILL);
+                return;
+            }
+
             if (loot->loot_type == LOOT_NONE)
             {
                 // for creature, loot is filled when creature is killed.
@@ -8571,14 +8592,16 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
             if (loot->loot_type == LOOT_SKINNING)
             {
                 loot_type = LOOT_SKINNING;
-                permission = creature->GetSkinner() == GetGUID() ? OWNER_PERMISSION : NONE_PERMISSION;
+                permission = creature->GetLootRecipientGUID() == GetGUID() ? OWNER_PERMISSION : NONE_PERMISSION;
             }
             else if (loot_type == LOOT_SKINNING)
             {
                 loot->clear();
                 loot->FillLoot(creature->GetCreatureTemplate()->SkinLootId, LootTemplates_Skinning, this, true);
-                creature->SetSkinner(GetGUID());
                 permission = OWNER_PERMISSION;
+
+                // Set new loot recipient
+                creature->SetLootRecipient(this, false);
             }
             // set group rights only for loot_type != LOOT_SKINNING
             else
@@ -8639,12 +8662,12 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
         // add 'this' player as one of the players that are looting 'loot'
         loot->AddLooter(GetGUID());
+
+        if (loot_type == LOOT_CORPSE && !guid.IsItem())
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
     }
     else
         SendLootError(GetLootGUID(), LOOT_ERROR_DIDNT_KILL);
-
-    if (loot_type == LOOT_CORPSE && !guid.IsItem())
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
 }
 
 void Player::SendLootError(ObjectGuid guid, LootError error) const
@@ -17677,7 +17700,7 @@ bool Player::isAllowedToLoot(const Creature* creature)
         return false;
 
     if (loot->loot_type == LOOT_SKINNING)
-        return creature->GetSkinner() == GetGUID();
+        return creature->GetLootRecipientGUID() == GetGUID();
 
     Group* thisGroup = GetGroup();
     if (!thisGroup)
@@ -20853,10 +20876,10 @@ void Player::ApplyModToSpell(SpellModifier* mod, Spell* spell)
 
 void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 {
-    if (!spell || (m_spellModTakingSpell && m_spellModTakingSpell != spell))
+    if (apply && m_spellModTakingSpell != nullptr)
         return;
 
-    if (apply && spell->getState() == SPELL_STATE_FINISHED)
+    if (!apply && (!m_spellModTakingSpell || m_spellModTakingSpell != spell))
         return;
 
     m_spellModTakingSpell = apply ? spell : nullptr;

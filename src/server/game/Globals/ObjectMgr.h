@@ -114,7 +114,9 @@ enum ScriptCommands
     SCRIPT_COMMAND_EQUIP                 = 31,               // soucre = Creature, datalong = equipment id
     SCRIPT_COMMAND_MODEL                 = 32,               // source = Creature, datalong = model id
     SCRIPT_COMMAND_CLOSE_GOSSIP          = 33,               // source = Player
-    SCRIPT_COMMAND_PLAYMOVIE             = 34                // source = Player, datalong = movie id
+    SCRIPT_COMMAND_PLAYMOVIE             = 34,               // source = Player, datalong = movie id
+    SCRIPT_COMMAND_MOVEMENT              = 35,               // source = Creature, datalong = MovementType, datalong2 = MovementDistance (spawndist f.ex.), dataint = pathid
+    SCRIPT_COMMAND_PLAY_ANIMKIT          = 36                // source = Creature, datalong = AnimKit id (NOT ON 3.3.5A, DON'T REUSE)
 };
 
 // Benchmarked: Faster than std::unordered_map (insert/find)
@@ -363,6 +365,13 @@ struct ScriptInfo
         {
             uint32 MovieID;         // datalong
         } PlayMovie;
+
+        struct                       // SCRIPT_COMMAND_MOVEMENT (35)
+        {
+            uint32 MovementType;     // datalong
+            uint32 MovementDistance; // datalong2
+            int32  Path;             // dataint
+        } Movement;
     };
 
     std::string GetDebugInfo() const;
@@ -606,7 +615,19 @@ struct QuestPOI
 };
 
 typedef std::vector<QuestPOI> QuestPOIVector;
-typedef std::unordered_map<uint32, QuestPOIVector> QuestPOIContainer;
+
+struct QuestPOIWrapper
+{
+    QuestPOIVector DataVector;
+    ByteBuffer QueryDataBuffer;
+
+    void InitializeQueryData(uint32 questId);
+    ByteBuffer BuildQueryData(uint32 questId) const;
+    
+    QuestPOIWrapper() : QueryDataBuffer(0) { }
+};
+
+typedef std::unordered_map<uint32, QuestPOIWrapper> QuestPOIContainer;
 
 struct GraveYardData
 {
@@ -668,6 +689,17 @@ struct DungeonEncounter
 
 typedef std::list<DungeonEncounter const*> DungeonEncounterList;
 typedef std::unordered_map<uint32, DungeonEncounterList> DungeonEncounterContainer;
+
+enum QueryDataGroup
+{
+    QUERY_DATA_CREATURES        = 0x01,
+    QUERY_DATA_GAMEOBJECTS      = 0x02,
+    QUERY_DATA_ITEMS            = 0x04,
+    QUERY_DATA_QUESTS           = 0x08,
+    QUERY_DATA_POIS             = 0x10,
+
+    QUERY_DATA_ALL              = 0xFF
+};
 
 class PlayerDumpReader;
 
@@ -868,7 +900,7 @@ class TC_GAME_API ObjectMgr
             return nullptr;
         }
 
-        QuestPOIVector const* GetQuestPOIVector(uint32 questId)
+        QuestPOIWrapper const* GetQuestPOIWrapper(uint32 questId)
         {
             QuestPOIContainer::const_iterator itr = _questPOIStore.find(questId);
             if (itr != _questPOIStore.end())
@@ -1023,6 +1055,8 @@ class TC_GAME_API ObjectMgr
         void LoadVendors();
         void LoadTrainerSpell();
         void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel);
+
+        void InitializeQueriesData(QueryDataGroup mask);
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);

@@ -4655,6 +4655,7 @@ public:
 	{
 		PrepareSpellScript(crazy_alchemists_potion_SpellScript);
 
+<<<<<<< HEAD
 		void SecondaryEffect()
 		{
 			std::vector<uint32> availableElixirs =
@@ -4671,6 +4672,10 @@ public:
 				53914, // Mighty Nature Protection Potion (40216)
 				53915  // Mighty Shadow Protection Potion (40217)
 			};
+=======
+            if (target->getPowerType() == POWER_MANA)
+                availableElixirs.push_back(28509); // Elixir of Major Mageblood (22840)
+>>>>>>> ae9d01a3245c59a8a8d50516a79b79250337450d
 
 			Unit* target = GetCaster();
 
@@ -4679,7 +4684,29 @@ public:
 			if (target->getPowerType() == POWER_MANA)
 				availableElixirs.push_back(43186); // Runic Mana Potion(33448)
 
+<<<<<<< HEAD
 			uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+=======
+            SpellGroup chosenSpellGroup = SPELL_GROUP_NONE;
+            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_BATTLE))
+                chosenSpellGroup = SPELL_GROUP_ELIXIR_BATTLE;
+            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_GUARDIAN))
+                chosenSpellGroup = SPELL_GROUP_ELIXIR_GUARDIAN;
+            // If another spell of the same group is already active the elixir should not be cast
+            if (chosenSpellGroup != SPELL_GROUP_NONE)
+            {
+                Unit::AuraApplicationMap const& auraMap = target->GetAppliedAuras();
+                for (auto itr = auraMap.begin(); itr != auraMap.end(); ++itr)
+                {
+                    uint32 spellId = itr->second->GetBase()->GetId();
+                    if (sSpellMgr->IsSpellMemberOfSpellGroup(spellId, chosenSpellGroup) && spellId != chosenElixir)
+                    {
+                        useElixir = false;
+                        break;
+                    }
+                }
+            }
+>>>>>>> ae9d01a3245c59a8a8d50516a79b79250337450d
 
 			target->CastSpell(target, chosenElixir, true, GetCastItem());
 		}
