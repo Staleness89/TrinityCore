@@ -281,38 +281,6 @@ class spell_item_arcane_shroud : public SpellScriptLoader
         }
 };
 
-// Item - 12846: Argent Dawn Commission
-// Item - 13209: Seal of the Dawn
-// Item - 19812: Rune of the Dawn
-
-// 17670 - Argent Dawn Commission
-class spell_item_argent_dawn_commission : public SpellScriptLoader
-{
-    public:
-        spell_item_argent_dawn_commission() : SpellScriptLoader("spell_item_argent_dawn_commission") { }
-
-        class spell_item_argent_dawn_commission_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_item_argent_dawn_commission_AuraScript);
-
-            void HandleDummy(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-            {
-                // Prevent console log
-                PreventDefaultAction();
-            }
-
-            void Register() override
-            {
-                OnEffectProc += AuraEffectProcFn(spell_item_argent_dawn_commission_AuraScript::HandleDummy, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_item_argent_dawn_commission_AuraScript();
-        }
-};
-
 enum AuraOfMadness
 {
     SPELL_SOCIOPATH         = 39511, // Sociopath: +35 strength(Paladin, Rogue, Druid, Warrior)
@@ -1146,7 +1114,7 @@ class spell_item_gnomish_death_ray : public SpellScriptLoader
         }
 };
 
-// Item 10721: Gnomish Harm Prevention Belt 
+// Item 10721: Gnomish Harm Prevention Belt
 // 13234 - Harm Prevention Belt
 enum HarmPreventionBelt
 {
@@ -5172,7 +5140,6 @@ void AddSC_item_spell_scripts()
     new spell_item_alchemists_stone();
     new spell_item_anger_capacitor<8>("spell_item_tiny_abomination_in_a_jar");
     new spell_item_anger_capacitor<7>("spell_item_tiny_abomination_in_a_jar_hero");
-    new spell_item_argent_dawn_commission();
     new spell_item_aura_of_madness();
     new spell_item_dementia();
     new spell_item_blessing_of_ancient_kings();
@@ -5291,4 +5258,6 @@ void AddSC_item_spell_scripts()
 	new spell_thrown_weapons_tome();
 	new spell_unarmed_tome();
 	new spell_defense_tome();
+    new spell_item_mad_alchemists_potion();
+    new spell_item_crazy_alchemists_potion();
 }
