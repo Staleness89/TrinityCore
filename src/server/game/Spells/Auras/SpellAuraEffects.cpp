@@ -1691,7 +1691,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             TC_LOG_ERROR("spells", "Auras: Unknown Shapeshift Type: %u", GetMiscValue());
     }
 
-    modelid = target->GetModelForForm(form);
+    modelid = target->GetModelForForm(form, GetId());
 
     if (apply)
     {
@@ -2081,8 +2081,9 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                 {
                     uint32 model_id = 0;
 
-                    if (uint32 modelid = ci->GetRandomValidModelId())
-                        model_id = modelid;                     // Will use the default model here
+                    // choose a model, based on trigger flag
+                    if (uint32 modelid = ObjectMgr::ChooseDisplayId(ci))
+                        model_id = modelid;
 
                     // Polymorph (sheep)
                     if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellInfo()->SpellIconID == 82 && GetSpellInfo()->SpellVisual[0] == 12978)
@@ -5612,8 +5613,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
         }
     }
-    else
-        damage = uint32(target->CountPctFromMaxHealth(damage));
+    else // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
+        damage = uint32(ceil(CalculatePct<float, float>(target->GetMaxHealth(), damage)));
 
     if (!m_spellInfo->HasAttribute(SPELL_ATTR4_FIXED_DAMAGE))
     {
