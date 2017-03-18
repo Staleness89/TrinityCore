@@ -4480,54 +4480,54 @@ enum ZandalarianCharms
 // 24661 - Restless Strength
 class spell_item_zandalarian_charm : public SpellScriptLoader
 {
-    public:
-        spell_item_zandalarian_charm(char const* ScriptName, uint32 SpellId) : SpellScriptLoader(ScriptName), _spellId(SpellId) { }
+public:
+	spell_item_zandalarian_charm(char const* ScriptName, uint32 SpellId) : SpellScriptLoader(ScriptName), _spellId(SpellId) { }
 
-        class spell_item_zandalarian_charm_AuraScript : public AuraScript
-        {
-            friend class spell_item_zandalarian_charm;
-            spell_item_zandalarian_charm_AuraScript(uint32 SpellId) : AuraScript(), _spellId(SpellId) { }
+	class spell_item_zandalarian_charm_AuraScript : public AuraScript
+	{
+		friend class spell_item_zandalarian_charm;
+		spell_item_zandalarian_charm_AuraScript(uint32 SpellId) : AuraScript(), _spellId(SpellId) { }
 
-            PrepareAuraScript(spell_item_zandalarian_charm_AuraScript);
+		PrepareAuraScript(spell_item_zandalarian_charm_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(_spellId))
-                    return false;
-                return true;
-            }
+		bool Validate(SpellInfo const* /*spellInfo*/) override
+		{
+			if (!sSpellMgr->GetSpellInfo(_spellId))
+				return false;
+			return true;
+		}
 
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
-                    if (spellInfo->Id != m_scriptSpellId)
-                        return true;
+		bool CheckProc(ProcEventInfo& eventInfo)
+		{
+			if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+				if (spellInfo->Id != m_scriptSpellId)
+					return true;
 
-                return false;
-            }
+			return false;
+		}
 
-            void HandleStackDrop(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-            {
-                PreventDefaultAction();
-                GetTarget()->RemoveAuraFromStack(_spellId);
-            }
+		void HandleStackDrop(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+		{
+			PreventDefaultAction();
+			GetTarget()->RemoveAuraFromStack(_spellId);
+		}
 
-            void Register() override
-            {
-                DoCheckProc += AuraCheckProcFn(spell_item_zandalarian_charm_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_item_zandalarian_charm_AuraScript::HandleStackDrop, EFFECT_0, SPELL_AURA_DUMMY);
-            }
+		void Register() override
+		{
+			DoCheckProc += AuraCheckProcFn(spell_item_zandalarian_charm_AuraScript::CheckProc);
+			OnEffectProc += AuraEffectProcFn(spell_item_zandalarian_charm_AuraScript::HandleStackDrop, EFFECT_0, SPELL_AURA_DUMMY);
+		}
 
-            uint32 _spellId;
-        };
+		uint32 _spellId;
+	};
 
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_item_zandalarian_charm_AuraScript(_spellId);
-        }
+	AuraScript* GetAuraScript() const override
+	{
+		return new spell_item_zandalarian_charm_AuraScript(_spellId);
+	}
 
-    private:
-        uint32 _spellId;
+private:
+	uint32 _spellId;
 };
 
 // 45051 - Mad Alchemist's Potion (34440)
@@ -4582,13 +4582,13 @@ public:
 			if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_GUARDIAN))
 				chosenSpellGroup = SPELL_GROUP_ELIXIR_GUARDIAN;
 			// If another spell of the same group is already active the elixir should not be cast
-			if (chosenSpellGroup)
+			if (chosenSpellGroup != SPELL_GROUP_NONE)
 			{
-				Unit::AuraApplicationMap& Auras = target->GetAppliedAuras();
-				for (Unit::AuraApplicationMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
+				Unit::AuraApplicationMap const& auraMap = target->GetAppliedAuras();
+				for (auto itr = auraMap.begin(); itr != auraMap.end(); ++itr)
 				{
-					uint32 spell_id = itr->second->GetBase()->GetId();
-					if (sSpellMgr->IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) && spell_id != chosenElixir)
+					uint32 spellId = itr->second->GetBase()->GetId();
+					if (sSpellMgr->IsSpellMemberOfSpellGroup(spellId, chosenSpellGroup) && spellId != chosenElixir)
 					{
 						useElixir = false;
 						break;
@@ -4623,7 +4623,6 @@ public:
 	{
 		PrepareSpellScript(crazy_alchemists_potion_SpellScript);
 
-<<<<<<< HEAD
 		void SecondaryEffect()
 		{
 			std::vector<uint32> availableElixirs =
@@ -4640,10 +4639,6 @@ public:
 				53914, // Mighty Nature Protection Potion (40216)
 				53915  // Mighty Shadow Protection Potion (40217)
 			};
-=======
-            if (target->getPowerType() == POWER_MANA)
-                availableElixirs.push_back(28509); // Elixir of Major Mageblood (22840)
->>>>>>> ae9d01a3245c59a8a8d50516a79b79250337450d
 
 			Unit* target = GetCaster();
 
@@ -4652,29 +4647,7 @@ public:
 			if (target->getPowerType() == POWER_MANA)
 				availableElixirs.push_back(43186); // Runic Mana Potion(33448)
 
-<<<<<<< HEAD
 			uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
-=======
-            SpellGroup chosenSpellGroup = SPELL_GROUP_NONE;
-            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_BATTLE))
-                chosenSpellGroup = SPELL_GROUP_ELIXIR_BATTLE;
-            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_GUARDIAN))
-                chosenSpellGroup = SPELL_GROUP_ELIXIR_GUARDIAN;
-            // If another spell of the same group is already active the elixir should not be cast
-            if (chosenSpellGroup != SPELL_GROUP_NONE)
-            {
-                Unit::AuraApplicationMap const& auraMap = target->GetAppliedAuras();
-                for (auto itr = auraMap.begin(); itr != auraMap.end(); ++itr)
-                {
-                    uint32 spellId = itr->second->GetBase()->GetId();
-                    if (sSpellMgr->IsSpellMemberOfSpellGroup(spellId, chosenSpellGroup) && spellId != chosenElixir)
-                    {
-                        useElixir = false;
-                        break;
-                    }
-                }
-            }
->>>>>>> ae9d01a3245c59a8a8d50516a79b79250337450d
 
 			target->CastSpell(target, chosenElixir, true, GetCastItem());
 		}
@@ -5258,6 +5231,4 @@ void AddSC_item_spell_scripts()
 	new spell_thrown_weapons_tome();
 	new spell_unarmed_tome();
 	new spell_defense_tome();
-    new spell_item_mad_alchemists_potion();
-    new spell_item_crazy_alchemists_potion();
 }
