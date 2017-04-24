@@ -436,6 +436,62 @@ class item_generic_limit_chance_above_60 : public ItemScript
         }
 };
 
+enum LanguageBooks
+{
+	ITEM_COMMON_LANGUAGE = 150049,
+	ITEM_ORCISH_LANGUAGE = 150048
+};
+
+enum LanguageSpells
+{
+	// HACK SPELLS TO UPDATE CHAT LOG
+	// @TODO FIX THAT
+	SPELL_LEARN_COMMON  = 150186,
+	SPELL_LEARN_ORCISH  = 150185
+};
+
+class item_common_language : public ItemScript
+{
+public:
+	item_common_language() : ItemScript("item_common_language") { }
+	
+	bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/) override
+	{
+		if (!player->HasSkill(SKILL_LANG_COMMON))
+		{
+			player->LearnDefaultSkill(SKILL_LANG_COMMON, 300);
+			player->CastSpell(player, SPELL_LEARN_COMMON, true, item);
+			
+			player->DestroyItemCount(ITEM_COMMON_LANGUAGE, 1, true);
+			return true;
+		}
+		else
+			player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, item, NULL);
+		return false;
+	}
+};
+
+class item_orcish_language : public ItemScript
+{
+public:
+	item_orcish_language() : ItemScript("item_orcish_language") { }
+
+	bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/) override
+	{
+		if (!player->HasSkill(SKILL_LANG_ORCISH))
+		{
+			player->LearnDefaultSkill(SKILL_LANG_ORCISH, 300);
+			player->CastSpell(player, SPELL_LEARN_ORCISH, true, item);
+
+			player->DestroyItemCount(ITEM_ORCISH_LANGUAGE, 1, true);
+			return true;
+		}
+		else
+			player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, item, NULL);
+		return false;
+	}
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -450,4 +506,6 @@ void AddSC_item_scripts()
     new item_trident_of_nazjan();
     new item_captured_frog();
     new item_generic_limit_chance_above_60();
+	new item_common_language();
+	new item_orcish_language();
 }
