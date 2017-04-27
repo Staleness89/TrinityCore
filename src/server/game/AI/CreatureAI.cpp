@@ -162,9 +162,9 @@ void CreatureAI::TriggerAlert(Unit const* who) const
     me->SendAIReaction(AI_REACTION_ALERT);
 
     // Face the unit (stealthed player) and set distracted state for 5 seconds
-    me->SetFacingTo(me->GetAngle(who->GetPositionX(), who->GetPositionY()), true);
-    me->StopMoving();
     me->GetMotionMaster()->MoveDistract(5 * IN_MILLISECONDS);
+    me->StopMoving();
+    me->SetFacingTo(me->GetAngle(who));
 }
 
 void CreatureAI::EnterEvadeMode(EvadeReason why)
@@ -206,7 +206,7 @@ void CreatureAI::SetGazeOn(Unit* target)
 {
     if (me->IsValidAttackTarget(target))
     {
-        if (!me->IsFocusing(nullptr, true))
+        if (!me->IsFocusing(nullptr, true) && target != me->GetVictim())
             AttackStart(target);
         me->SetReactState(REACT_PASSIVE);
     }
@@ -226,7 +226,7 @@ bool CreatureAI::UpdateVictimWithGaze()
     }
 
     if (Unit* victim = me->SelectVictim())
-        if (!me->IsFocusing(nullptr, true))
+        if (!me->IsFocusing(nullptr, true) && victim != me->GetVictim())
             AttackStart(victim);
 
     return me->GetVictim() != nullptr;

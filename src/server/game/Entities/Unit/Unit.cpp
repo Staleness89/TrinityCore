@@ -2090,7 +2090,7 @@ void Unit::AttackerStateUpdate(Unit* victim, WeaponAttackType attType, bool extr
         return;                                             // ignore ranged case
 
     if (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        SetFacingToObject(victim); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
+        SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
     // melee attack spell cast at main hand attack only - no normal melee dmg dealt
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
@@ -2138,7 +2138,7 @@ void Unit::FakeAttackerStateUpdate(Unit* victim, WeaponAttackType attType /*= BA
         return;                                             // ignore ranged case
 
     if (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        SetFacingToObject(victim); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
+        SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
     CalcDamageInfo damageInfo;
     damageInfo.attacker = this;
@@ -3324,9 +3324,6 @@ bool Unit::IsMovementPreventedByCasting() const
         if (spell->getState() != SPELL_STATE_FINISHED && spell->IsChannelActive())
             if (spell->GetSpellInfo()->IsMoveAllowedChannel())
                 return false;
-
-    if (const_cast<Unit*>(this)->IsFocusing(nullptr, true))
-        return false;
 
     // prohibit movement for all other spell casts
     return true;
@@ -9527,7 +9524,8 @@ void Unit::TauntApply(Unit* taunter)
     if (target && target == taunter)
         return;
 
-    SetInFront(taunter);
+    if (!IsFocusing(nullptr, true))
+        SetInFront(taunter);
     if (creature->IsAIEnabled)
         creature->AI()->AttackStart(taunter);
 
@@ -9566,7 +9564,8 @@ void Unit::TauntFadeOut(Unit* taunter)
 
     if (target && target != taunter)
     {
-        SetInFront(target);
+        if (!IsFocusing(nullptr, true))
+            SetInFront(target);
         if (creature->IsAIEnabled)
             creature->AI()->AttackStart(target);
     }
@@ -9648,7 +9647,7 @@ Unit* Creature::SelectVictim()
 
     if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
     {
-        if (!IsFocusing())
+        if (!IsFocusing(nullptr, true))
             SetInFront(target);
         return target;
     }
@@ -14392,7 +14391,8 @@ void Unit::SetInFront(WorldObject const* target)
 
 void Unit::SetFacingTo(float ori, bool force)
 {
-    if (!force && !IsStopped())
+    // do not face when already moving
+    if (!force && (!IsStopped() || !movespline->Finalized()))
         return;
 
     Movement::MoveSplineInit init(this);
@@ -14406,7 +14406,7 @@ void Unit::SetFacingTo(float ori, bool force)
 void Unit::SetFacingToObject(WorldObject const* object, bool force)
 {
     // do not face when already moving
-    if (!force && !IsStopped())
+    if (!force && (!IsStopped() || !movespline->Finalized()))
         return;
 
     /// @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
