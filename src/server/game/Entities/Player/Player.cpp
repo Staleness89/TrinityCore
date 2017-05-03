@@ -1817,15 +1817,6 @@ uint8 Player::GetChatTag() const
     return tag;
 }
 
-void Player::SendTeleportAckPacket()
-{
-    WorldPacket data(MSG_MOVE_TELEPORT_ACK, 41);
-    data << GetPackGUID();
-    data << uint32(0);                                     // this value increments every time
-    BuildMovementPacket(&data);
-    GetSession()->SendPacket(&data);
-}
-
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
@@ -1928,16 +1919,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
-        {
-            Position newPosition(x, y, z, orientation);
-            if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-                newPosition.m_positionZ += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
-
-            UpdatePosition(newPosition, true);
-            SendTeleportAckPacket();
-            SendTeleportPacket();
-            UpdateObjectVisibility();
-        }
+            SendTeleportPacket(m_teleport_dest);
     }
     else
     {
@@ -19661,7 +19643,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
         Item* item = m_items[i];
         if (!item)
             continue;
-        
+
         if (item->GetState() == ITEM_NEW)
         {
             if (ItemTemplate const* itemTemplate = item->GetTemplate())
