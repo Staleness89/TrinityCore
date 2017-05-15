@@ -13196,6 +13196,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
         {
 		case FORM_CAT:
 
+			else if (HasAura(54912))    // Glyph of the Red lynx
 				return 15593;
 			else if (HasAura(58133))   // Glyph of the yellow lynx?
 				return 18167;
