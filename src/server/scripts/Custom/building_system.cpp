@@ -118,8 +118,10 @@ public:
 			float y = object->GetPosition().GetPositionY();
 			float z = object->GetPosition().GetPositionZ();
 
+			/*
 			if (player->IsWithinDist3d(x, y, z, range - object->GetObjectSize()))
 				players.push_back(player);
+				*/
 		}
 
 		//Trinity::AnyPlayerInObjectRangeCheck checker(object, 12.f);
@@ -298,12 +300,12 @@ public:
 			{
 				if (!existsInDB) return;
 
-				std::list<Player*> playersNear = PlayerHelper::getPlayersNear(go, RANGE_BASE);
+				std::list<Player*> playersNear = PlayerHelper::getPlayersNear(me, RANGE_BASE);
 
-				for (Player* player : getEnteringPlayers(go, playersNear))
+				for (Player* player : getEnteringPlayers(me, playersNear))
 					onPlayerEnter(player);
 
-				for (Player* player : getLeavingPlayers(go, playersNear))
+				for (Player* player : getLeavingPlayers(me, playersNear))
 					onPlayerLeave(player);
 
 				playerGUIDsNear = PlayerHelper::playerGUIDS(playersNear);
@@ -316,13 +318,13 @@ public:
 	private:
 		void onPlayerEnter(Player* player)
 		{
-			std::string enterMessage = "You're entering " + getPlayerNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
+			std::string enterMessage = "You're entering " + getPlayerNameFromFlagGUID(me->GetSpawnId()) + "'s territory";
 			player->GetSession()->SendAreaTriggerMessage(enterMessage.c_str());
 		}
 
 		void onPlayerLeave(Player* player)
 		{
-			std::string leaveMessage = "You're leaving " + getPlayerNameFromFlagGUID(go->GetSpawnId()) + "'s territory";
+			std::string leaveMessage = "You're leaving " + getPlayerNameFromFlagGUID(me->GetSpawnId()) + "'s territory";
 			player->GetSession()->SendAreaTriggerMessage(leaveMessage.c_str());
 		}
 
@@ -358,7 +360,7 @@ public:
 
 		bool checkForDBEntry()
 		{
-			int guid = go->GetSpawnId();
+			int guid = me->GetSpawnId();
 			QueryResult result = WorldDatabase.PQuery("SELECT guid FROM gameobject WHERE guid=%i", guid);
 			return result != nullptr ? true : false;
 		}

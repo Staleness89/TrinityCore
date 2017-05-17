@@ -13196,6 +13196,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
         {
 		case FORM_CAT:
 
+			if (HasAura(150218))  // Fangs of Ashamane
+				return 70165;
+			else if (HasAura(150224))  // Ghost of the Pridemother
+				return 70170;
+			else if (HasAura(150226))  // Nature's Fury
+				return 70174;
+			else if (HasAura(150228))  // Primal Stalker
+				return 70178;
+			else if (HasAura(150230))  // Moonspirit
+				return 70147;
+
 			else if (HasAura(54912))    // Glyph of the Red lynx
 				return 15593;
 			else if (HasAura(58133))   // Glyph of the yellow lynx?
@@ -13342,6 +13353,20 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 8571;
 		case FORM_DIREBEAR:
 		case FORM_BEAR:
+
+			if (HasAura(150210)) // Claws of Ursoc
+				return 70150;
+			else if (HasAura(150212)) // Stonepaw
+				return 70154;
+			else if (HasAura(150214)) // Avatar of Ursol
+				return 70157;
+			else if (HasAura(150216)) // Fallen to Nightmare
+				return 70161;
+			else if (HasAura(150220)) // Might of the Grizzlemaw
+				return 70142;
+			else if (HasAura(150222)) // Guadian of the Glade
+				return 70141;
+
 			// Based on Hair color
 			if (getRace() == RACE_NIGHTELF)
 			{
@@ -13522,6 +13547,10 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 20857;
 			return 20872;
 		case FORM_FLIGHT_EPIC:  // EPIC FLIGHT
+
+			if (HasAura(99999999)) // Glyph of the Lunarwing @TODO: make glyph spells
+				return 90031;
+
 			if (getRace() == RACE_NIGHTELF)
 				return 38250;
 			else if (getRace() == RACE_TROLL)

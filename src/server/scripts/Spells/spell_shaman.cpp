@@ -88,7 +88,9 @@ enum ShamanSpells
 	SPELL_SHAMAN_FIRE_ELEMENTAL                 = 2894,
 	SPELL_SHAMAN_FIRE_ELEMENTAL_UNBOUND         = 32983, //need to copy
     SPELL_SHA_EARTHQUAKE                        = 61882,
-    SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN           = 77505
+    SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN           = 77505,	
+    SPELL_SHAMAN_FOCUSED_INSIGHT                = 77800,
+    SPELL_SHAMAN_TELLURIC_CURRENTS              = 82987
 };
 
 enum ShamanSpellIcons
@@ -2435,6 +2437,81 @@ public:
 	AuraScript* GetAuraScript() const
 	{
 		return new spell_sha_unbound_elements_AuraScript();
+	}
+};
+
+// 77794 - Focused Insight
+class spell_sha_focused_insight : public SpellScriptLoader
+{
+public:
+	spell_sha_focused_insight() : SpellScriptLoader("spell_sha_focused_insight") { }
+
+	class spell_sha_focused_insight_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_sha_focused_insight_AuraScript);
+
+		bool Validate(SpellInfo const* /*spellInfo*/) override
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FOCUSED_INSIGHT))
+				return false;
+			return true;
+		}
+
+		void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+		{
+			PreventDefaultAction();
+			int32 basePoints0 = aurEff->GetAmount();
+			int32 basePoints1 = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+
+			GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_FOCUSED_INSIGHT, &basePoints0, &basePoints1, &basePoints1, true, NULL, aurEff);
+		}
+
+		void Register() override
+		{
+			OnEffectProc += AuraEffectProcFn(spell_sha_focused_insight_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+		}
+	};
+
+	AuraScript* GetAuraScript() const override
+	{
+		return new spell_sha_focused_insight_AuraScript();
+	}
+};
+
+// 82984 - Telluric Currents
+class spell_sha_telluric_currents : public SpellScriptLoader
+{
+public:
+	spell_sha_telluric_currents() : SpellScriptLoader("spell_sha_telluric_currents") { }
+
+	class spell_sha_telluric_currents_AuraScript : public AuraScript
+	{
+		PrepareAuraScript(spell_sha_telluric_currents_AuraScript);
+
+		bool Validate(SpellInfo const* /*spellInfo*/) override
+		{
+			if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TELLURIC_CURRENTS))
+				return false;
+			return true;
+		}
+
+		void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+		{
+			PreventDefaultAction();
+			int32 basePoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
+
+			GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TELLURIC_CURRENTS, &basePoints0, NULL, NULL, true);
+		}
+
+		void Register() override
+		{
+			OnEffectProc += AuraEffectProcFn(spell_sha_telluric_currents_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+		}
+	};
+
+	AuraScript* GetAuraScript() const override
+	{
+		return new spell_sha_telluric_currents_AuraScript();
 	}
 };
 

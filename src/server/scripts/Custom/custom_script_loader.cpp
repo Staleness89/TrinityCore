@@ -17,11 +17,11 @@
 
 // This is where scripts' loading functions should be declared:
 
-void AddSC_building_system();
+//void AddSC_building_system();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
-    AddSC_building_system();
+  //  AddSC_building_system();
 }

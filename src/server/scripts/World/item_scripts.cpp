@@ -466,8 +466,10 @@ public:
 			return true;
 		}
 		else
+		{
 			player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, item, NULL);
-		return false;
+			return false;
+		}			
 	}
 };
 
@@ -487,8 +489,10 @@ public:
 			return true;
 		}
 		else
+		{
 			player->SendEquipError(EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, item, NULL);
-		return false;
+			return false;
+		}			
 	}
 };
 
