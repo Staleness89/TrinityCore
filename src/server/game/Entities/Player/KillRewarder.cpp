@@ -190,23 +190,21 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (_victim->GetTypeId() == TYPEID_PLAYER)
             player->KilledPlayerCredit();
     }
-    // Give XP only in PvE or in battlegrounds.
-    // Give reputation and kill credit only in PvE.
-    if (!_isPvP || _isBattleGround)
-    {
-        float const rate = _group ?
-            _groupRate * float(player->getLevel()) / _sumLevel : // Group rate depends on summary level.
-            1.0f;                                                // Personal rate is 100%.
-        if (_xp)
-            // 4.2. Give XP.
-            _RewardXP(player, rate);
-        if (!_isBattleGround)
-        {
-            // If killer is in dungeon then all members receive full reputation at kill.
-            _RewardReputation(player, isDungeon ? 1.0f : rate);
-            _RewardKillCredit(player);
-        }
-    }
+
+	float const rate = _group ?
+		_groupRate * float(player->getLevel()) / _sumLevel : // Group rate depends on summary level.
+		1.0f;                                                // Personal rate is 100%.
+	if (_xp)
+		// 4.2. Give XP.
+		_RewardXP(player, rate);
+	if (!_isBattleGround)
+	{
+		// If killer is in dungeon then all members receive full reputation at kill.
+		_RewardReputation(player, isDungeon ? 1.0f : rate);
+	}
+    // Give kill credit only in PvE.
+    if (!_isPvP)
+		_RewardKillCredit(player);
 }
 
 void KillRewarder::_RewardGroup()
@@ -259,9 +257,8 @@ void KillRewarder::Reward()
         // 3.2.1. Initialize initial XP amount based on killer's level.
         _InitXP(_killer);
         // To avoid unnecessary calculations and calls,
-        // proceed only if XP is not ZERO or player is not on battleground
-        // (battleground rewards only XP, that's why).
-        if (!_isBattleGround || _xp)
+        // proceed only if XP is not ZERO
+        if (_xp)
             // 3.2.2. Reward killer.
             _RewardPlayer(_killer, false);
     }

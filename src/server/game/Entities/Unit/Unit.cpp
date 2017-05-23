@@ -13548,8 +13548,19 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 			return 20872;
 		case FORM_FLIGHT_EPIC:  // EPIC FLIGHT
 
-			if (HasAura(99999999)) // Glyph of the Lunarwing @TODO: make glyph spells
-				return 90031;
+			if (HasAura(150232)) // Glyph of the Lunarwing
+			{
+				if (getRace() == RACE_NIGHTELF)
+					return 90034;
+				else if (getRace() == RACE_TROLL)
+					return 90033;
+				else if (getRace() == RACE_TAUREN)
+					return 90031;
+				else if (getRace() == RACE_FEL_ORC) // Worgen
+					return 90032;
+				else
+					return 90031;
+			}
 
 			if (getRace() == RACE_NIGHTELF)
 				return 38250;

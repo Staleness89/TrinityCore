@@ -6733,9 +6733,6 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
 // Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardReputation(Unit* victim, float rate)
 {
-    if (!victim || victim->GetTypeId() == TYPEID_PLAYER)
-        return;
-
     if (victim->ToCreature()->IsReputationGainDisabled())
         return;
 
@@ -6749,10 +6746,8 @@ void Player::RewardReputation(Unit* victim, float rate)
     {
         // support for: Championing - http://www.wowwiki.com/Championing
         Map const* map = GetMap();
-        if (map->IsNonRaidDungeon())
-            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->reclevel == 80)
-                    ChampioningFaction = GetChampioningFaction();
+        if (map->IsDungeon() || map->IsBattleground())
+            ChampioningFaction = GetChampioningFaction();
     }
 
     uint32 team = GetTeam();
