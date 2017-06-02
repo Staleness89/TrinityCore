@@ -69,7 +69,7 @@ enum WarriorSpells
     SPELL_WARRIOR_T10_MELEE_4P_BONUS                = 70847,
     SPELL_WARRIOR_MORTAL_STRIKE                     = 12294,
     SPELL_WARRIOR_REND                              = 94009,
-	SPELL_LAMBS_TO_THE_SLAUGHTER                    = 84583
+	SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER            = 84583
 };
 
 enum WarriorSpellIcons
@@ -1190,8 +1190,7 @@ public:
 
 		bool Validate(SpellInfo const* /*spellInfo*/) override
 		{
-			if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_MORTAL_STRIKE) ||
-				!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_REND) || !sSpellMgr->GetSpellInfo(SPELL_LAMBS_TO_THE_SLAUGHTER))
+			if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER))
 				return false;
 			return true;
 		}

@@ -2917,16 +2917,8 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     // "kill" original creature
     creatureTarget->DespawnOrUnsummon();
 
-    uint8 level = (creatureTarget->getLevel() < (m_caster->getLevel() - 5)) ? (m_caster->getLevel() - 5) : creatureTarget->getLevel();
-
-    // prepare visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
-
     // add to world
     pet->GetMap()->AddToMap(pet->ToCreature());
-
-    // visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
     // caster have pet now
     m_caster->SetMinion(pet, true);
