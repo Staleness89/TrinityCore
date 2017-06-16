@@ -1906,6 +1906,33 @@ enum Mounts
 {
     SPELL_COLD_WEATHER_FLYING           = 54197,
 
+	// Tyreal's Charger
+	SPELL_TYREALS_CHARGER_60            = 107203,
+	SPELL_TYREALS_CHARGER_100           = 107204,
+	
+
+	// Winged Guardian
+	SPELL_WINGED_GUARDIAN_150           = 98726,
+	SPELL_WINGED_GUARDIAN_280           = 98727,
+
+	// Cindermane Charger
+	SPELL_CINDERMANE_CHARGER_150        = 90174,
+	SPELL_CINDERMANE_CHARGER_280        = 90175,
+
+	// Warforged Nightmare
+	SPELL_WARFORGED_NIGHTMARE_60        = 90172,
+	SPELL_WARFORGED_NIGHTMARE_180       = 90173,
+
+	// Dread Raven
+	SPELL_DREAD_RAVEN_150               = 90134,
+	SPELL_DREAD_RAVEN_280               = 90136,
+	SPELL_DREAD_RAVEN_310               = 90135,
+
+	// Fel Dread Raven
+	SPELL_FEL_DREAD_RAVEN_150           = 150123,
+	SPELL_FEL_DREAD_RAVEN_280           = 150117,
+	SPELL_FEL_DREAD_RAVEN_310           = 150115,
+
     // Magic Broom
     SPELL_MAGIC_BROOM_60                = 42680,
     SPELL_MAGIC_BROOM_100               = 42683,
@@ -4301,6 +4328,14 @@ void AddSC_generic_spell_scripts()
     new spell_gen_mount("spell_blazing_hippogryph", 0, 0, 0, SPELL_BLAZING_HIPPOGRYPH_150, SPELL_BLAZING_HIPPOGRYPH_280);
     new spell_gen_mount("spell_celestial_steed", 0, SPELL_CELESTIAL_STEED_60, SPELL_CELESTIAL_STEED_100, SPELL_CELESTIAL_STEED_150, SPELL_CELESTIAL_STEED_280, SPELL_CELESTIAL_STEED_310);
     new spell_gen_mount("spell_x53_touring_rocket", 0, 0, 0, SPELL_X53_TOURING_ROCKET_150, SPELL_X53_TOURING_ROCKET_280, SPELL_X53_TOURING_ROCKET_310);
+
+	new spell_gen_mount("spell_tyreals_charger", SPELL_TYREALS_CHARGER_60, SPELL_TYREALS_CHARGER_100, 0, 0, 0, 0);
+	new spell_gen_mount("spell_warforged_nightmare", SPELL_WARFORGED_NIGHTMARE_60, SPELL_WARFORGED_NIGHTMARE_180, 0, 0, 0, 0);
+	new spell_gen_mount("spell_winged_guardian", 0, 0, 0, SPELL_WINGED_GUARDIAN_150, SPELL_WINGED_GUARDIAN_280, 0);
+	new spell_gen_mount("spell_cindermane_charger", 0, 0, 0, SPELL_CINDERMANE_CHARGER_150, SPELL_CINDERMANE_CHARGER_280, 0);
+	new spell_gen_mount("spell_dread_raven", 0, 0, 0, SPELL_DREAD_RAVEN_150, SPELL_DREAD_RAVEN_280, SPELL_DREAD_RAVEN_310);
+	new spell_gen_mount("spell_fel_dread_raven", 0, 0, 0, SPELL_FEL_DREAD_RAVEN_150, SPELL_FEL_DREAD_RAVEN_280, SPELL_FEL_DREAD_RAVEN_310);
+
     new spell_gen_mounted_charge();
     new spell_gen_moss_covered_feet();
     new spell_gen_netherbloom();
