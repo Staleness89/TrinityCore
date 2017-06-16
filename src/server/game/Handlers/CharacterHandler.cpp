@@ -929,6 +929,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1105), 42999, false); // The Oracles
             repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1119), 42999, false); // The Sons of Hodir
             repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1091), 42999, false); // The Wyrmrest Accord
+            repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1135), 42999, false); // The Earthen Ring
+            repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1265), 42999, false); // Shen'dralar
+            //repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1204), 42999, false); // Avenger's of Hyjal
 
             // Factions depending on team, like cities and some more stuff
             switch (pCurrChar->GetTeam())
@@ -938,6 +941,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  47), 42999, false); // Ironforge
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  69), 42999, false); // Darnassus
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 930), 42999, false); // Exodar
+                    repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1134), 42999, false); // Gukbeas
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 730), 42999, false); // Stormpike Guard
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 978), 42999, false); // Kurenai
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  54), 42999, false); // Gnomeregan Exiles
@@ -947,12 +951,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1126), 42999, false); // The Frostborn
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1094), 42999, false); // The Silver Covenant
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1050), 42999, false); // Valiance Expedition
+                    repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1174), 42999, false); // Wildhammer Clan
                     break;
                 case HORDE:
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  76), 42999, false); // Orgrimmar
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  68), 42999, false); // Undercity
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  81), 42999, false); // Thunder Bluff
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 911), 42999, false); // Silvermoon City
+                    repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1133), 42999, false); // Bilgewater Cartel
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 729), 42999, false); // Frostwolf Clan
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 941), 42999, false); // The Mag'har
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry( 530), 42999, false); // Darkspear Trolls
@@ -962,6 +968,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1124), 42999, false); // The Sunreavers
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1064), 42999, false); // The Taunka
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1085), 42999, false); // Warsong Offensive
+                    repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1172), 42999, false); // Dragonmaw Clan
                     break;
                 default:
                     break;
