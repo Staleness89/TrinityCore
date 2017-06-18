@@ -32,7 +32,6 @@
 #include "WeatherMgr.h"
 #include "Player.h"
 #include "Pet.h"
-#include "LFG.h"
 #include "GroupMgr.h"
 #include "MMapFactory.h"
 #include "DisableMgr.h"

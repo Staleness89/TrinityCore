@@ -16,7 +16,6 @@
  */
 
 #include "CreatureTextMgr.h"
-#include "LFGMgr.h"
 #include "ScriptedGossip.h"
 #include "ScriptedCreature.h"
 #include "GameObjectAI.h"
@@ -196,14 +195,6 @@ public:
                 me->Kill(ahuneBunny);
             if (Creature* frozenCore = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_FROZEN_CORE)))
                 me->Kill(frozenCore);
-
-            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-            {
-                if (Group* group = players.begin()->GetSource()->GetGroup())
-                    if (group->isLFGGroup())
-                        sLFGMgr->FinishDungeon(group->GetGUID(), 286, me->GetMap());
-            }
 
             _JustDied();
         }

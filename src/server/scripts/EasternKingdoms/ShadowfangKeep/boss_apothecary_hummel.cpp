@@ -18,7 +18,6 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
-#include "LFGMgr.h"
 #include "Player.h"
 #include "Group.h"
 #include "SpellScript.h"
@@ -174,14 +173,6 @@ class boss_apothecary_hummel : public CreatureScript
                 events.Reset();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29 | UNIT_FLAG_NOT_SELECTABLE);
                 instance->SetBossState(DATA_APOTHECARY_HUMMEL, DONE);
-
-                Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                if (!players.isEmpty())
-                {
-                    if (Group* group = players.begin()->GetSource()->GetGroup())
-                        if (group->isLFGGroup())
-                            sLFGMgr->FinishDungeon(group->GetGUID(), 288, me->GetMap());
-                }
             }
 
             void UpdateAI(uint32 diff) override

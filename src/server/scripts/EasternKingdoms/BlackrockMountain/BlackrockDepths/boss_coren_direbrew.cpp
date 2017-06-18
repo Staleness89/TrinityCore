@@ -22,7 +22,6 @@
 #include "Player.h"
 #include "SpellScript.h"
 #include "SpellAuras.h"
-#include "LFGMgr.h"
 #include "Group.h"
 #include "GridNotifiers.h"
 #include "GameObjectAI.h"
@@ -198,14 +197,6 @@ public:
         void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
-
-            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-            {
-                if (Group* group = players.begin()->GetSource()->GetGroup())
-                    if (group->isLFGGroup())
-                        sLFGMgr->FinishDungeon(group->GetGUID(), 287, me->GetMap());
-            }
         }
 
         void SummonSister(uint32 entry)

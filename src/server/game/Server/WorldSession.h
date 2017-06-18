@@ -54,17 +54,6 @@ struct MovementInfo;
 struct Petition;
 struct TradeStatusInfo;
 
-namespace lfg
-{
-struct LfgJoinResultData;
-struct LfgPlayerBoot;
-struct LfgProposal;
-struct LfgQueueStatusData;
-struct LfgPlayerRewardData;
-struct LfgRoleCheck;
-struct LfgUpdateData;
-}
-
 namespace rbac
 {
 class RBACData;
@@ -864,34 +853,6 @@ class TC_GAME_API WorldSession
         void HandleResetInstancesOpcode(WorldPacket& recvData);
         void HandleHearthAndResurrect(WorldPacket& recvData);
         void HandleInstanceLockResponse(WorldPacket& recvPacket);
-
-        // Looking for Dungeon/Raid
-        void HandleLfgSetCommentOpcode(WorldPacket& recvData);
-        void HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recvData);
-        void HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recvData);
-        void HandleLfgJoinOpcode(WorldPacket& recvData);
-        void HandleLfgLeaveOpcode(WorldPacket& recvData);
-        void HandleLfgSetRolesOpcode(WorldPacket& recvData);
-        void HandleLfgProposalResultOpcode(WorldPacket& recvData);
-        void HandleLfgSetBootVoteOpcode(WorldPacket& recvData);
-        void HandleLfgTeleportOpcode(WorldPacket& recvData);
-        void HandleLfrJoinOpcode(WorldPacket& recvData);
-        void HandleLfrLeaveOpcode(WorldPacket& recvData);
-        void HandleLfgGetStatus(WorldPacket& recvData);
-
-        void SendLfgUpdatePlayer(lfg::LfgUpdateData const& updateData);
-        void SendLfgUpdateParty(lfg::LfgUpdateData const& updateData);
-        void SendLfgRoleChosen(ObjectGuid guid, uint8 roles);
-        void SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& pRoleCheck);
-        void SendLfgLfrList(bool update);
-        void SendLfgJoinResult(lfg::LfgJoinResultData const& joinData);
-        void SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData);
-        void SendLfgPlayerReward(lfg::LfgPlayerRewardData const& lfgPlayerRewardData);
-        void SendLfgBootProposalUpdate(lfg::LfgPlayerBoot const& boot);
-        void SendLfgUpdateProposal(lfg::LfgProposal const& proposal);
-        void SendLfgDisabled();
-        void SendLfgOfferContinue(uint32 dungeonEntry);
-        void SendLfgTeleportError(uint8 err);
 
         // Arena Team
         void HandleInspectArenaTeamsOpcode(WorldPacket& recvData);

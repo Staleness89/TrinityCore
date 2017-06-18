@@ -36,7 +36,6 @@
 #include "WorldSession.h"
 #include "Chat.h"
 #include "MapManager.h"
-#include "LFGScripts.h"
 #include "InstanceScript.h"
 
 // Trait which indicates whether this script type
@@ -1025,10 +1024,7 @@ void ScriptMgr::Initialize()
 
     // SmartAI
     AddSC_SmartScripts();
-
-    // LFGScripts
-    lfg::AddSC_LFGScripts();
-
+	
     // Load all static linked scripts through the script loader function.
     ASSERT(_script_loader_callback,
            "Script loader callback wasn't registered!");

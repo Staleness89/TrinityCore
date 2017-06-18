@@ -28,7 +28,6 @@ EndScriptData */
 #include "GameObjectAI.h"
 #include "SpellMgr.h"
 #include "scarlet_monastery.h"
-#include "LFGMgr.h"
 #include "Player.h"
 #include "Group.h"
 #include "SpellInfo.h"
@@ -571,14 +570,6 @@ public:
             if (Creature* wisp = DoSpawnCreature(WISP_INVIS, 0, 0, 0, 0, TEMPSUMMON_TIMED_DESPAWN, 60000))
                 ENSURE_AI(npc_wisp_invis::npc_wisp_invisAI, wisp->AI())->SetType(4);
             instance->SetBossState(DATA_HORSEMAN_EVENT, DONE);
-
-            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-            if (!players.isEmpty())
-            {
-                if (Group* group = players.begin()->GetSource()->GetGroup())
-                    if (group->isLFGGroup())
-                        sLFGMgr->FinishDungeon(group->GetGUID(), 285, me->GetMap());
-            }
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell) override

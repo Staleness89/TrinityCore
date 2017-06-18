@@ -46,7 +46,6 @@
 #include "GuildMgr.h"
 #include "InstanceSaveMgr.h"
 #include "Language.h"
-#include "LFGMgr.h"
 #include "LootItemStorage.h"
 #include "MapManager.h"
 #include "Memory.h"
@@ -1665,14 +1664,8 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
-    TC_LOG_INFO("server.loading", "Loading LFG entrance positions..."); // Must be after areatriggers
-    sLFGMgr->LoadLFGDungeons();
-
     TC_LOG_INFO("server.loading", "Loading Dungeon boss data...");
     sObjectMgr->LoadInstanceEncounters();
-
-    TC_LOG_INFO("server.loading", "Loading LFG rewards...");
-    sLFGMgr->LoadRewards();
 
     TC_LOG_INFO("server.loading", "Loading Graveyard-zone links...");
     sObjectMgr->LoadGraveyardZones();
@@ -2235,10 +2228,7 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_DELETECHARS].Reset();
         Player::DeleteOldCharacters();
     }
-
-    sLFGMgr->Update(diff);
-    sWorldUpdateTime.RecordUpdateTimeDuration("UpdateLFGMgr");
-
+	
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();
     sWorldUpdateTime.RecordUpdateTimeDuration("ProcessQueryCallbacks");
