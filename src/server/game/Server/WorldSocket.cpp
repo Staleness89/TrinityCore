@@ -18,12 +18,16 @@
 
 #include "WorldSocket.h"
 #include "BigNumber.h"
+#include "DatabaseEnv.h"
 #include "Opcodes.h"
-#include "QueryCallback.h"
+#include "PacketLog.h"
+#include "Random.h"
+#include "RBAC.h"
+#include "Realm.h"
 #include "ScriptMgr.h"
 #include "SHA1.h"
-#include "PacketLog.h"
-
+#include "World.h"
+#include "WorldSession.h"
 #include <memory>
 
 class EncryptablePacket : public WorldPacket
@@ -353,7 +357,10 @@ WorldSocket::ReadDataHandlerResult WorldSocket::ReadDataHandler()
             return ReadDataHandlerResult::Error;
         }
         case CMSG_KEEP_ALIVE:
+            sessionGuard.lock();
             LogOpcodeText(opcode, sessionGuard);
+            if (_worldSession)
+                _worldSession->ResetTimeOutTime(true);
             break;
         default:
         {
@@ -374,9 +381,8 @@ WorldSocket::ReadDataHandlerResult WorldSocket::ReadDataHandler()
                 break;
             }
 
-            // Our Idle timer will reset on any non PING opcodes.
-            // Catches people idling on the login screen and any lingering ingame connections.
-            _worldSession->ResetTimeOutTime();
+            // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
+            _worldSession->ResetTimeOutTime(false);
 
             // Copy the packet to the heap before enqueuing
             _worldSession->QueuePacket(new WorldPacket(std::move(packet)));
@@ -505,7 +511,7 @@ void WorldSocket::HandleAuthSessionCallback(std::shared_ptr<AuthSession> authSes
     sha.UpdateData((uint8*)&t, 4);
     sha.UpdateData((uint8*)&authSession->LocalChallenge, 4);
     sha.UpdateData((uint8*)&_authSeed, 4);
-    sha.UpdateBigNumbers(&account.SessionKey, NULL);
+    sha.UpdateBigNumbers(&account.SessionKey, nullptr);
     sha.Finalize();
 
     if (memcmp(sha.GetDigest(), authSession->Digest, SHA_DIGEST_LENGTH) != 0)
@@ -546,7 +552,7 @@ void WorldSocket::HandleAuthSessionCallback(std::shared_ptr<AuthSession> authSes
     //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
     if (mutetime < 0)
     {
-        mutetime = time(NULL) + llabs(mutetime);
+        mutetime = time(nullptr) + llabs(mutetime);
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
         stmt->setInt64(0, mutetime);

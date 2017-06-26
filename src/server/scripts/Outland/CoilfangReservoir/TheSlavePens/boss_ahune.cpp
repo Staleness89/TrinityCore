@@ -15,13 +15,21 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CreatureTextMgr.h"
-#include "ScriptedGossip.h"
-#include "ScriptedCreature.h"
-#include "GameObjectAI.h"
 #include "ScriptMgr.h"
+#include "CreatureTextMgr.h"
+#include "GameObject.h"
+#include "GameObjectAI.h"
+#include "Group.h"
+#include "InstanceScript.h"
+#include "Map.h"
+#include "MotionMaster.h"
+#include "ObjectAccessor.h"
+#include "Player.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include "the_slave_pens.h"
 
 enum Spells
@@ -271,7 +279,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return GetInstanceAI<boss_ahuneAI>(creature);
+        return GetSlavePensAI<boss_ahuneAI>(creature);
     }
 };
 
@@ -349,7 +357,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return GetInstanceAI<npc_frozen_coreAI>(creature);
+        return GetSlavePensAI<npc_frozen_coreAI>(creature);
     }
 };
 
@@ -387,7 +395,7 @@ public:
             _summons.DespawnAll();
             ResetFlameCallers();
 
-            me->SummonGameObject(GO_ICE_STONE, -69.90455f, -162.2449f, -2.366563f, 2.426008f, G3D::Quat(0.0f, 0.0f, 0.9366722f, 0.3502074f), 0);
+            me->SummonGameObject(GO_ICE_STONE, -69.90455f, -162.2449f, -2.366563f, 2.426008f, QuaternionData(0.0f, 0.0f, 0.9366722f, 0.3502074f), 0);
         }
 
         void DoAction(int32 action) override
@@ -501,7 +509,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return GetInstanceAI<npc_ahune_bunnyAI>(creature);
+        return GetSlavePensAI<npc_ahune_bunnyAI>(creature);
     }
 };
 
@@ -629,7 +637,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return GetInstanceAI<npc_earthen_ring_flamecallerAI>(creature);
+        return GetSlavePensAI<npc_earthen_ring_flamecallerAI>(creature);
     }
 };
 
@@ -663,7 +671,7 @@ public:
 
     GameObjectAI* GetAI(GameObject* go) const override
     {
-        return GetInstanceAI<go_ahune_ice_stoneAI>(go);
+        return GetSlavePensAI<go_ahune_ice_stoneAI>(go);
     }
 };
 
@@ -679,9 +687,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SYNCH_HEALTH))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_SYNCH_HEALTH });
         }
 
         void HandleScript(SpellEffIndex /*effIndex*/)
@@ -715,9 +721,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_FORCE_WHISP_FLIGHT) || !sSpellMgr->GetSpellInfo(SPELL_SUMMONING_RHYME_BONFIRE))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_FORCE_WHISP_FLIGHT, SPELL_SUMMONING_RHYME_BONFIRE });
         }
 
         void PeriodicTick(AuraEffect const* aurEff)
@@ -733,14 +737,14 @@ public:
             switch (aurEff->GetTickNumber())
             {
                 case 1:
-                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_1, NULL, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
+                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_1, nullptr, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
                     player->CastSpell(player, SPELL_SUMMONING_RHYME_BONFIRE, true);
                     break;
                 case 2:
-                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_2, NULL, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
+                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_2, nullptr, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
                     break;
                 case 3:
-                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_3, NULL, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
+                    sCreatureTextMgr->SendChat(caster, SAY_PLAYER_TEXT_3, nullptr, CHAT_MSG_SAY, LANG_UNIVERSAL, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
                     Remove();
                     break;
             }
@@ -770,9 +774,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ICE_SPEAR_GO) || !sSpellMgr->GetSpellInfo(SPELL_ICE_SPEAR_KNOCKBACK))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_SUMMON_ICE_SPEAR_GO, SPELL_ICE_SPEAR_KNOCKBACK });
         }
 
         void PeriodicTick(AuraEffect const* aurEff)
@@ -823,9 +825,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_ICE_SPEAR_TARGET_PICKER))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_ICE_SPEAR_TARGET_PICKER });
         }
 
         void PeriodicTick(AuraEffect const* /*aurEff*/)
@@ -858,9 +858,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_ICE_SPEAR_BUNNY))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_SUMMON_ICE_SPEAR_BUNNY });
         }
 
         void FilterTargets(std::list<WorldObject*>& targets)
@@ -903,9 +901,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_SLIPPERY_FLOOR_SLIP))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_SLIPPERY_FLOOR_SLIP });
         }
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
@@ -942,9 +938,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_COLD_SLAP))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_COLD_SLAP });
         }
 
         void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
@@ -1004,9 +998,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_ICE_BOMBARDMENT))
-                return false;
-            return true;
+            return ValidateSpellInfo({ SPELL_ICE_BOMBARDMENT });
         }
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
