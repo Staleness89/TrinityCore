@@ -29,7 +29,6 @@
 #include "InstanceSaveMgr.h"
 #include "Item.h"
 #include "Language.h"
-#include "LFG.h"
 #include "Log.h"
 #include "MMapFactory.h"
 #include "MovementGenerator.h"
@@ -37,15 +36,12 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Pet.h"
-<<<<<<< HEAD
 #include "GroupMgr.h"
 #include "MMapFactory.h"
 #include "DisableMgr.h"
-=======
 #include "Player.h"
 #include "Realm.h"
 #include "SpellAuras.h"
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "TargetedMovementGenerator.h"

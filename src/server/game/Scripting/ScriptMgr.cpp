@@ -26,7 +26,6 @@
 #include "GossipDef.h"
 #include "InstanceScript.h"
 #include "Item.h"
-#include "LFGScripts.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"

@@ -33,12 +33,8 @@ EndScriptData */
 #include "DisableMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "Language.h"
-<<<<<<< HEAD
-=======
-#include "LFGMgr.h"
 #include "Log.h"
 #include "LootMgr.h"
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "SkillDiscovery.h"
@@ -1004,25 +1000,13 @@ public:
         return true;
     }
 
-<<<<<<< HEAD
     static bool HandleReloadLocalesCreatureCommand(ChatHandler* handler, const char* /*args*/)
-=======
-    static bool HandleReloadLfgRewardsCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        TC_LOG_INFO("misc", "Re-Loading lfg dungeon rewards...");
-        sLFGMgr->LoadRewards();
-        handler->SendGlobalGMSysMessage("DB table `lfg_dungeon_rewards` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadLocalesCreatureCommand(ChatHandler* handler, char const* /*args*/)
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
-    {
-        TC_LOG_INFO("misc", "Re-Loading Creature Template Locale...");
-        sObjectMgr->LoadCreatureLocales();
-        handler->SendGlobalGMSysMessage("DB table `creature_template_locale` reloaded.");
-        return true;
-    }
+	{
+		TC_LOG_INFO("misc", "Re-Loading Creature Template Locale...");
+		sObjectMgr->LoadCreatureLocales();
+		handler->SendGlobalGMSysMessage("DB table `creature_template_locale` reloaded.");
+		return true;
+	}
 
     static bool HandleReloadLocalesCreatureTextCommand(ChatHandler* handler, char const* /*args*/)
     {

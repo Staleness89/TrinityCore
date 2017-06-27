@@ -57,7 +57,6 @@
 #include "Item.h"
 #include "KillRewarder.h"
 #include "Language.h"
-#include "LFGMgr.h"
 #include "Log.h"
 #include "LootItemStorage.h"
 #include "LootMgr.h"

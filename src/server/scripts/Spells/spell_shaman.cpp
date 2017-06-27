@@ -2312,9 +2312,10 @@ public:
 
 		bool Validate(SpellInfo const* /*spellEntry*/)
 		{
-			if (!sSpellStore.LookupEntry(SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN))
-				return false;
-			return true;
+			return ValidateSpellInfo(
+			{
+				SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN
+			});
 		}
 
 		bool Load()

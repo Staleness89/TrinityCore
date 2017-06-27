@@ -21,21 +21,17 @@
 #include "GridNotifiers.h"
 #include "Group.h"
 #include "InstanceScript.h"
-#include "LFGMgr.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
-<<<<<<< HEAD
 #include "Group.h"
 #include "GridNotifiers.h"
 #include "GameObjectAI.h"
-=======
 #include "SpellScript.h"
 #include "TemporarySummon.h"
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
 
 enum DirebrewSays
 {

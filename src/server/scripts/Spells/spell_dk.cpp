@@ -2952,7 +2952,6 @@ public:
 							std::advance(itr, urand(0, runes.size() - 1));
 							player->SetRuneCooldown((*itr), 0);
 							player->ResyncRunes(MAX_RUNES);
-							TC_LOG_INFO("Spells", "Spell is working!");
 					}
 				}
 			}

@@ -137,22 +137,18 @@ class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
                 });
             }
 
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-            {
-                PreventDefaultAction();
+			void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+			{
+				PreventDefaultAction();
 
-                uint32 maxEnergy = GetTarget()->GetMaxPower(POWER_ENERGY);
-                int32 energy = CalculatePct(maxEnergy, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
+				uint32 maxEnergy = GetTarget()->GetMaxPower(POWER_ENERGY);
+				int32 energy = CalculatePct(maxEnergy, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
 
-                if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
-                    AddPct(energy, glyph->GetAmount());
+				if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
+					AddPct(energy, glyph->GetAmount());
 
-<<<<<<< HEAD
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, energy, GetTarget(), true, NULL, aurEff);
-=======
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, nullptr, aurEff);
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
-            }
+				GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, energy, GetTarget(), true, nullptr, aurEff);
+			}
 
             void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
             {
@@ -1070,18 +1066,11 @@ class spell_hun_rapid_recuperation_trigger : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-<<<<<<< HEAD
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2))
-                    return false;
-                return true;
-=======
                 return ValidateSpellInfo(
                 {
-                    SPELL_HUNTER_RAPID_RECUPERATION_MANA_R1,
-                    SPELL_HUNTER_RAPID_RECUPERATION_MANA_R2
+                    SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1,
+                    SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2
                 });
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
             }
 
             void HandleRapidFireProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
@@ -1406,13 +1395,7 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-<<<<<<< HEAD
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY))
-                    return false;
-                return true;
-=======
-                return ValidateSpellInfo({ SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA });
->>>>>>> 7dfd472f8dff6ce067572e2887c2beb56d9ba9de
+                return ValidateSpellInfo({ SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY });
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
