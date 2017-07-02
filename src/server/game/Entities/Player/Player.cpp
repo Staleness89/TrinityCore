@@ -5845,9 +5845,10 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
         return;
 
     float chance = float(3 * lvldif * skilldif) / plevel;
-  /*  if (!defense)  edit: may not be blizzlike
-        if (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)   edit: pretty sure all classes benefit from intellect for weapon skills though*/
-            chance += chance * 0.02f * GetStat(STAT_INTELLECT);
+	if (!defense)
+		chance += chance * 0.02f * GetStat(STAT_INTELLECT);
+	else if (defense)
+		chance += chance * 0.02f * GetStat(STAT_SPIRIT);
 
     chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%
 
