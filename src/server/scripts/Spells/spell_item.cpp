@@ -4648,34 +4648,6 @@ public:
     }
 };
 
-class spell_skill_train_tome : public SpellScriptLoader
-{
-public:
-	spell_skill_train_tome() : SpellScriptLoader("spell_skill_train_tome") { }
-
-	class spell_skill_train_tome_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_skill_train_tome_SpellScript);
-
-		void HandleDummy(SpellEffIndex)
-		{
-			SpellInfo const* spellInfo = GetSpellInfo();
-			Player* target = GetHitPlayer()->ToPlayer();
-			target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
-		}
-
-		void Register() override
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_skill_train_tome_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-		}
-	};
-
-	SpellScript* GetSpellScript() const override
-	{
-		return new spell_skill_train_tome_SpellScript();
-	}
-};
-
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -4793,6 +4765,4 @@ void AddSC_item_spell_scripts()
 
     new spell_item_mad_alchemists_potion();
     new spell_item_crazy_alchemists_potion();
-
-	new spell_skill_train_tome();
 }

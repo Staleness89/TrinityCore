@@ -2680,60 +2680,6 @@ public:
     }
 };
 
-class spell_cooking_profession_dailies : public SpellScriptLoader
-{
-public:
-	spell_cooking_profession_dailies() : SpellScriptLoader("spell_cooking_profession_dailies") { }
-
-	class spell_cooking_profession_dailies_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_cooking_profession_dailies_SpellScript);
-
-		void HandleDummy(SpellEffIndex)
-		{
-			Player* target = GetHitPlayer()->ToPlayer();
-			target->UpdateSkill(185, 1);
-		}
-
-		void Register() override
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_cooking_profession_dailies_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-		}
-	};
-	
-	SpellScript* GetSpellScript() const override
-	{
-		return new spell_cooking_profession_dailies_SpellScript();
-	}
-};
-
-class spell_fishing_profession_dailies : public SpellScriptLoader
-{
-public:
-	spell_fishing_profession_dailies() : SpellScriptLoader("spell_fishing_profession_dailies") { }
-
-	class spell_fishing_profession_dailies_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_fishing_profession_dailies_SpellScript);
-
-		void HandleDummy(SpellEffIndex)
-		{
-			Player* target = GetHitPlayer()->ToPlayer();
-			target->UpdateSkill(356, 1);
-		}
-
-		void Register() override
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_fishing_profession_dailies_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-		}
-	};
-
-	SpellScript* GetSpellScript() const override
-	{
-		return new spell_fishing_profession_dailies_SpellScript();
-	}
-};
-
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -2801,6 +2747,4 @@ void AddSC_quest_spell_scripts()
     new spell_q11306_mixing_vrykul_blood();
     new spell_q11306_failed_mix_43376();
     new spell_q11306_failed_mix_43378();
-	new spell_fishing_profession_dailies();
-	new spell_cooking_profession_dailies();
 }

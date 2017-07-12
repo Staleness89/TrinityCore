@@ -4220,6 +4220,34 @@ class spell_gen_pony_mount_check : public SpellScriptLoader
         }
 };
 
+class spell_gen_skill_update : public SpellScriptLoader
+{
+public:
+	spell_gen_skill_update() : SpellScriptLoader("spell_gen_skill_update") { }
+
+	class spell_gen_skill_update_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_gen_skill_update_SpellScript);
+
+		void HandleDummy(SpellEffIndex)
+		{
+			SpellInfo const* spellInfo = GetSpellInfo();
+			Player* target = GetHitPlayer()->ToPlayer();
+			target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
+		}
+
+		void Register() override
+		{
+			OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+		}
+	};
+
+	SpellScript* GetSpellScript() const override
+	{
+		return new spell_gen_skill_update_SpellScript();
+	}
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4328,4 +4356,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_landmine_knockback_achievement();
     new spell_gen_clear_debuffs();
     new spell_gen_pony_mount_check();
+	new spell_gen_skill_update();
 }
