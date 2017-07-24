@@ -461,7 +461,7 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
                 if (Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
                     if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
                         if (roll_chance_i(aur->GetBaseAmount()))
-                            GetTarget()->CastSpell((Unit*)nullptr, SPELL_SHAMAN_TOTEM_EARTHEN_POWER, true);
+                            GetTarget()->CastSpell(nullptr, SPELL_SHAMAN_TOTEM_EARTHEN_POWER, true);
             }
 
             void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1081,7 +1081,7 @@ class spell_sha_imp_water_shield : public SpellScriptLoader
                     return;
 
                 uint32 spellId = waterShield->GetSpellInfo()->Effects[waterShield->GetEffIndex()].TriggerSpell;
-                caster->CastSpell((Unit*)nullptr, spellId, true, nullptr, aurEff);
+                caster->CastSpell(nullptr, spellId, true, nullptr, aurEff);
             }
 
             void Register() override
@@ -1314,7 +1314,7 @@ class spell_sha_item_t6_trinket : public SpellScriptLoader
                     return;
 
                 if (roll_chance_i(chance))
-                    eventInfo.GetActor()->CastSpell((Unit*)nullptr, spellId, true, nullptr, aurEff);
+                    eventInfo.GetActor()->CastSpell(nullptr, spellId, true, nullptr, aurEff);
             }
 
             void Register() override
@@ -1480,7 +1480,7 @@ class spell_sha_maelstrom_weapon : public SpellScriptLoader
                 if (!aurEff || !roll_chance_i(aurEff->GetAmount()))
                     return;
 
-                caster->CastSpell((Unit*)nullptr, SPELL_SHAMAN_MAELSTROM_POWER, true, nullptr, aurEff);
+                caster->CastSpell(nullptr, SPELL_SHAMAN_MAELSTROM_POWER, true, nullptr, aurEff);
             }
 
             void Register() override
