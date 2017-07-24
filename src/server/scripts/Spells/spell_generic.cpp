@@ -31,7 +31,6 @@
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Item.h"
-#include "LFGMgr.h"
 #include "Log.h"
 #include "Pet.h"
 #include "ReputationMgr.h"
@@ -3439,31 +3438,20 @@ class spell_gen_pony_mount_check : public AuraScript
     }
 };
 
-class spell_gen_skill_update : public SpellScriptLoader
+class spell_gen_skill_update : public SpellScript
 {
-public:
-	spell_gen_skill_update() : SpellScriptLoader("spell_gen_skill_update") { }
+	PrepareSpellScript(spell_gen_skill_update);
 
-	class spell_gen_skill_update_SpellScript : public SpellScript
+	void HandleDummy(SpellEffIndex)
 	{
-		PrepareSpellScript(spell_gen_skill_update_SpellScript);
+		SpellInfo const* spellInfo = GetSpellInfo();
+		Player* target = GetHitPlayer()->ToPlayer();
+		target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
+	}
 
-		void HandleDummy(SpellEffIndex)
-		{
-			SpellInfo const* spellInfo = GetSpellInfo();
-			Player* target = GetHitPlayer()->ToPlayer();
-			target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
-		}
-
-		void Register() override
-		{
-			OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-		}
-	};
-
-	SpellScript* GetSpellScript() const override
+	void Register() override
 	{
-		return new spell_gen_skill_update_SpellScript();
+		OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
 	}
 };
 
@@ -3567,5 +3555,5 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_gen_landmine_knockback_achievement);
     RegisterSpellScript(spell_gen_clear_debuffs);
     RegisterAuraScript(spell_gen_pony_mount_check);
-	new spell_gen_skill_update();
+	RegisterSpellScript(spell_gen_skill_update);
 }
