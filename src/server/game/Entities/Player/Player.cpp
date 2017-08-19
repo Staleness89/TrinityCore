@@ -7001,6 +7001,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             guild->UpdateMemberData(this, GUILD_MEMBER_DATA_ZONEID, newZone);
     }
 
+    GetMap()->UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
+
     // group update
     if (GetGroup())
         SetGroupUpdateFlag(GROUP_UPDATE_FULL);
@@ -23898,7 +23900,7 @@ void Player::ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidDat
             else
                 m_MirrorTimerFlags &= ~UNDERWATER_INLAVA;
         }
-        
+
         // Slime state (any contact)
         if (liquidData->type_flags & MAP_LIQUID_TYPE_SLIME)
         {
