@@ -114,9 +114,6 @@ bool Group::Create(Player* leader)
     if (m_groupType & GROUPTYPE_RAID)
         _initRaidSubGroupsCounter();
 
-    if (!isLFGGroup())
-        m_lootMethod = GROUP_LOOT;
-
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
     m_looterGuid = leaderGuid;
     m_masterLooterGuid.Clear();
@@ -489,12 +486,8 @@ bool Group::RemoveMember(ObjectGuid guid, RemoveMethod const& method /*= GROUP_R
         }
     }
 
-    // LFG group vote kick handled in scripts
-    if (isLFGGroup() && method == GROUP_REMOVEMETHOD_KICK)
-        return !m_memberSlots.empty();
-
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG/BF allow 1 member group)
-    if (GetMembersCount() > ((isBGGroup() || isLFGGroup() || isBFGroup()) ? 1u : 2u))
+    if (GetMembersCount() > ((isBGGroup() || isBFGroup()) ? 1u : 2u))
     {
         if (player)
         {
@@ -589,7 +582,7 @@ bool Group::RemoveMember(ObjectGuid guid, RemoveMethod const& method /*= GROUP_R
 
         SendUpdate();
 
-        if (m_memberMgr.getSize() < ((isLFGGroup() || isBGGroup()) ? 1u : 2u))
+        if (m_memberMgr.getSize() < ((isBGGroup()) ? 1u : 2u))
             Disband();
 
         return true;
@@ -1835,10 +1828,6 @@ void Group::UpdateLooterGuid(WorldObject* pLootedObject, bool ifneed)
 
 GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 /*MaxPlayerCount*/, bool isRated, uint32 arenaSlot)
 {
-    // check if this group is LFG group
-    if (isLFGGroup())
-        return ERR_LFG_CANT_USE_BATTLEGROUND;
-
     BattlemasterListEntry const* bgEntry = sBattlemasterListStore.LookupEntry(bgOrTemplate->GetTypeID());
     if (!bgEntry)
         return ERR_GROUP_JOIN_BATTLEGROUND_FAIL;            // shouldn't happen
@@ -2223,11 +2212,6 @@ void Group::SetLfgRoles(ObjectGuid guid, uint8 roles)
 bool Group::IsFull() const
 {
     return isRaidGroup() ? (m_memberSlots.size() >= MAXRAIDSIZE) : (m_memberSlots.size() >= MAXGROUPSIZE);
-}
-
-bool Group::isLFGGroup() const
-{
-    return (m_groupType & GROUPTYPE_LFG) != 0;
 }
 
 bool Group::isRaidGroup() const

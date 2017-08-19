@@ -206,7 +206,6 @@ class TC_GAME_API Group
 
         // properties accessories
         bool IsFull() const;
-        bool isLFGGroup()  const;
         bool isRaidGroup() const;
         bool isBGGroup()   const;
         bool isBFGroup()   const;
@@ -248,7 +247,6 @@ class TC_GAME_API Group
 
         uint8 GetMemberGroup(ObjectGuid guid) const;
 
-        void ConvertToLFG();
         void ConvertToRaid();
 
         void SetBattlegroundGroup(Battleground* bg);

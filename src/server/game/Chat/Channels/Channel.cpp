@@ -212,17 +212,6 @@ void Channel::JoinChannel(Player* player, std::string const& pass)
         return;
     }
 
-    if (HasFlag(CHANNEL_FLAG_LFG) &&
-        sWorld->getBoolConfig(CONFIG_RESTRICTED_LFG_CHANNEL) &&
-        AccountMgr::IsPlayerAccount(player->GetSession()->GetSecurity()) && //FIXME: Move to RBAC
-        player->GetGroup())
-    {
-        NotInLFGAppend appender;
-        ChannelNameBuilder<NotInLFGAppend> builder(this, appender);
-        SendToOne(builder, guid);
-        return;
-    }
-
     player->JoinedChannel(this);
 
     if (_announceEnabled && !player->GetSession()->HasPermission(rbac::RBAC_PERM_SILENTLY_JOIN_CHANNEL))

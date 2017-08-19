@@ -5108,18 +5108,6 @@ void Player::UpdateLocalChannels(uint32 newZone)
     }
 }
 
-void Player::LeaveLFGChannel()
-{
-    for (JoinedChannelsList::iterator i = m_channels.begin(); i != m_channels.end(); ++i)
-    {
-        if ((*i)->IsLFG())
-        {
-            (*i)->LeaveChannel(this);
-            break;
-        }
-    }
-}
-
 void Player::UpdateDefense()
 {
     if (UpdateSkill(SKILL_DEFENSE, sWorld->getIntConfig(CONFIG_SKILL_GAIN_DEFENSE)))

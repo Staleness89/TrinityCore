@@ -436,13 +436,6 @@ struct NotInAreaAppend
     void Append(WorldPacket& /*data*/) const { }
 };
 
-struct NotInLFGAppend
-{
-    static uint8 const NotificationType = CHAT_NOT_IN_LFG_NOTICE;
-
-    void Append(WorldPacket& /*data*/) const { }
-};
-
 struct VoiceOnAppend
 {
     explicit VoiceOnAppend(ObjectGuid const& guid) : _guid(guid) { }
