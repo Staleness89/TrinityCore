@@ -1568,7 +1568,44 @@ enum Mounts
     // X-53 Touring Rocket
     SPELL_X53_TOURING_ROCKET_150        = 75957,
     SPELL_X53_TOURING_ROCKET_280        = 75972,
-    SPELL_X53_TOURING_ROCKET_310        = 76154
+    SPELL_X53_TOURING_ROCKET_310        = 76154,
+
+	// Tyreal's Charger
+	SPELL_TYREALS_CHARGER_60 = 107203,
+	SPELL_TYREALS_CHARGER_100 = 107204,
+
+
+	// Winged Guardian
+	SPELL_WINGED_GUARDIAN_150 = 98726,
+	SPELL_WINGED_GUARDIAN_280 = 98727,
+
+	// Cindermane Charger
+	SPELL_CINDERMANE_CHARGER_150 = 90174,
+	SPELL_CINDERMANE_CHARGER_280 = 90175,
+
+	// Warforged Nightmare
+	SPELL_WARFORGED_NIGHTMARE_60 = 90172,
+	SPELL_WARFORGED_NIGHTMARE_180 = 90173,
+
+	// Dread Raven
+	SPELL_DREAD_RAVEN_150 = 90134,
+	SPELL_DREAD_RAVEN_280 = 90136,
+	SPELL_DREAD_RAVEN_310 = 90135,
+
+	// Fel Dread Raven
+	SPELL_FEL_DREAD_RAVEN_150 = 150123,
+	SPELL_FEL_DREAD_RAVEN_280 = 150117,
+	SPELL_FEL_DREAD_RAVEN_310 = 150115,
+
+	// Hearts of the Aspects
+	SPELL_HEART_OF_THE_ASPECTS_150 = 110049,
+	SPELL_HEART_OF_THE_ASPECTS_280 = 110050,
+	SPELL_HEART_OF_THE_ASPECTS_310 = 110051,
+
+	// Enchanted Fey Dragon
+	SPELL_ENCHANTED_FEY_DRAGON_150 = 142878,
+	SPELL_ENCHANTED_FEY_DRAGON_280 = 142879,
+	SPELL_ENCHANTED_FEY_DRAGON_310 = 142880
 };
 
 class spell_gen_mount : public SpellScriptLoader
@@ -3445,7 +3482,7 @@ class spell_gen_skill_update : public SpellScript
 	void HandleDummy(SpellEffIndex)
 	{
 		SpellInfo const* spellInfo = GetSpellInfo();
-		Player* target = GetHitPlayer()->ToPlayer();
+		Player* target = GetHitPlayer();
 		target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
 	}
 
@@ -3454,6 +3491,23 @@ class spell_gen_skill_update : public SpellScript
 		OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
 	}
 };
+
+class spell_gen_deathcharger_reins : public SpellScript
+{
+	PrepareSpellScript(spell_gen_deathcharger_reins);
+
+	void HandleDummy(SpellEffIndex)
+	{
+		Unit* caster = GetCaster();
+
+		switch (urand(0,3)
+		{
+		    case 0:
+				caster->
+		}
+	}
+};
+
 
 void AddSC_generic_spell_scripts()
 {
@@ -3509,6 +3563,17 @@ void AddSC_generic_spell_scripts()
     new spell_gen_mount("spell_blazing_hippogryph", 0, 0, 0, SPELL_BLAZING_HIPPOGRYPH_150, SPELL_BLAZING_HIPPOGRYPH_280);
     new spell_gen_mount("spell_celestial_steed", 0, SPELL_CELESTIAL_STEED_60, SPELL_CELESTIAL_STEED_100, SPELL_CELESTIAL_STEED_150, SPELL_CELESTIAL_STEED_280, SPELL_CELESTIAL_STEED_310);
     new spell_gen_mount("spell_x53_touring_rocket", 0, 0, 0, SPELL_X53_TOURING_ROCKET_150, SPELL_X53_TOURING_ROCKET_280, SPELL_X53_TOURING_ROCKET_310);
+
+	new spell_gen_mount("spell_tyreals_charger", SPELL_TYREALS_CHARGER_60, SPELL_TYREALS_CHARGER_100, 0, 0, 0, 0);
+	new spell_gen_mount("spell_warforged_nightmare", SPELL_WARFORGED_NIGHTMARE_60, SPELL_WARFORGED_NIGHTMARE_180, 0, 0, 0, 0);
+	new spell_gen_mount("spell_winged_guardian", 0, 0, 0, SPELL_WINGED_GUARDIAN_150, SPELL_WINGED_GUARDIAN_280, 0);
+	new spell_gen_mount("spell_cindermane_charger", 0, 0, 0, SPELL_CINDERMANE_CHARGER_150, SPELL_CINDERMANE_CHARGER_280, 0);
+	new spell_gen_mount("spell_dread_raven", 0, 0, 0, SPELL_DREAD_RAVEN_150, SPELL_DREAD_RAVEN_280, SPELL_DREAD_RAVEN_310);
+	new spell_gen_mount("spell_fel_dread_raven", 0, 0, 0, SPELL_FEL_DREAD_RAVEN_150, SPELL_FEL_DREAD_RAVEN_280, SPELL_FEL_DREAD_RAVEN_310);
+	new spell_gen_mount("spell_heart_of_the_aspects", 0, 0, 0, SPELL_HEART_OF_THE_ASPECTS_150, SPELL_HEART_OF_THE_ASPECTS_280, SPELL_HEART_OF_THE_ASPECTS_310);
+	new spell_gen_mount("spell_enchanted_fey_dragon", 0, 0, 0, SPELL_ENCHANTED_FEY_DRAGON_150, SPELL_ENCHANTED_FEY_DRAGON_280, SPELL_ENCHANTED_FEY_DRAGON_310);
+
+	
     RegisterSpellScript(spell_gen_mounted_charge);
     RegisterAuraScript(spell_gen_moss_covered_feet);
     RegisterSpellScript(spell_gen_netherbloom);
