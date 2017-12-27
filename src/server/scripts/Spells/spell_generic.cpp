@@ -3612,7 +3612,7 @@ void AddSC_generic_spell_scripts()
 	new spell_gen_mount("spell_heart_of_the_aspects", 0, 0, 0, SPELL_HEART_OF_THE_ASPECTS_150, SPELL_HEART_OF_THE_ASPECTS_280, SPELL_HEART_OF_THE_ASPECTS_310);
 	new spell_gen_mount("spell_enchanted_fey_dragon", 0, 0, 0, SPELL_ENCHANTED_FEY_DRAGON_150, SPELL_ENCHANTED_FEY_DRAGON_280, SPELL_ENCHANTED_FEY_DRAGON_310);
 	new spell_gen_mount("spell_grinning_reaver", 0, SPELL_GRINNING_REAVER_60, SPELL_GRINNING_REAVER_100, SPELL_GRINNING_REAVER_150, SPELL_GRINNING_REAVER_280, SPELL_GRINNING_REAVER_310);
-
+	new spell_gen_mount("spell_iron_skyreaver", 0, SPELL_IRON_SKYREAVER_60, SPELL_IRON_SKYREAVER_100, SPELL_IRON_SKYREAVER_150, SPELL_IRON_SKYREAVER_280, SPELL_IRON_SKYREAVER_310);
 	
     RegisterSpellScript(spell_gen_mounted_charge);
     RegisterAuraScript(spell_gen_moss_covered_feet);
