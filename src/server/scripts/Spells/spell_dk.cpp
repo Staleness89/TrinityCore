@@ -1021,6 +1021,11 @@ class spell_dk_death_rune : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_death_rune_AuraScript);
 
+            bool Load() override
+            {
+                return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER && GetUnitOwner()->ToPlayer()->getClass() == CLASS_DEATH_KNIGHT;
+            }
+
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 Unit* caster = eventInfo.GetActor();
@@ -1074,10 +1079,17 @@ class spell_dk_death_rune : public SpellScriptLoader
                 }
             }
 
+            void PeriodicTick(AuraEffect const* aurEff)
+            {
+                // timer expired - remove death runes
+                GetTarget()->ToPlayer()->RemoveRunesByAuraEffect(aurEff);
+            }
+
             void Register() override
             {
                 DoCheckProc += AuraCheckProcFn(spell_dk_death_rune_AuraScript::CheckProc);
                 OnProc += AuraProcFn(spell_dk_death_rune_AuraScript::HandleProc);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dk_death_rune_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
             }
         };
 
@@ -1239,6 +1251,23 @@ class spell_dk_glyph_of_scourge_strike : public SpellScriptLoader
         {
             return new spell_dk_glyph_of_scourge_strike_AuraScript();
         }
+};
+
+// 49016 - Hysteria
+class spell_dk_hysteria : public AuraScript
+{
+    PrepareAuraScript(spell_dk_hysteria);
+
+    void PeriodicTick(AuraEffect const* aurEff)
+    {
+        uint32 const damage = GetTarget()->CountPctFromMaxHealth(GetTarget()->CalculateSpellDamage(nullptr, GetSpellInfo(), aurEff->GetEffIndex()));
+        GetTarget()->DealDamage(GetTarget(), damage, nullptr, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_dk_hysteria::PeriodicTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+    }
 };
 
 // 51209 - Hungering Cold
@@ -2386,6 +2415,7 @@ class spell_dk_unholy_blight : public SpellScriptLoader
                 if (AuraEffect const* glyph = caster->GetAuraEffect(SPELL_DK_GLYPH_OF_UNHOLY_BLIGHT, EFFECT_0, caster->GetGUID()))
                     AddPct(amount, glyph->GetAmount());
 
+                ASSERT(spellInfo->GetMaxTicks() > 0);
                 amount /= spellInfo->GetMaxTicks();
 
                 // Add remaining ticks to healing done
@@ -3036,6 +3066,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_ghoul_explode();
     new spell_dk_glyph_of_death_grip();
     new spell_dk_glyph_of_scourge_strike();
+    RegisterAuraScript(spell_dk_hysteria);
     new spell_dk_hungering_cold();
     new spell_dk_icebound_fortitude();
     new spell_dk_improved_blood_presence();

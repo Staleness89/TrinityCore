@@ -21,3 +21,9 @@ nbproject/*
 .browse.VC*
 .vscode
 cmake-build-*/
+.vs
+src/server/game/DungeonFinding/LFGQueue.h
+src/server/game/DungeonFinding/LFGMgr.cpp
+src/server/game/DungeonFinding/LFGQueue.cpp
+src/server/game/DungeonFinding/LFGQueue.h
+src/server/game/Handlers/LFGHandler.cpp
