@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -390,7 +390,11 @@ struct npc_tirion_toc : public ScriptedAI
         else if (_instance->GetBossState(DATA_NORTHREND_BEASTS) != DONE)
             me->SummonCreature(NPC_BARRETT_BEASTS, BarretSpawnPosition);
         else if (_instance->GetBossState(DATA_JARAXXUS) != DONE)
+        {
             me->SummonCreature(NPC_BARRETT_JARAXXUS, BarretSpawnPosition);
+            if (_instance->GetBossState(DATA_JARAXXUS) == FAIL)
+                DoAction(ACTION_SUMMON_JARAXXUS);
+        }
         else if (_instance->GetBossState(DATA_FACTION_CRUSADERS) != DONE)
             me->SummonCreature(NPC_BARRETT_FACTION, BarretSpawnPosition);
         else if (_instance->GetBossState(DATA_TWIN_VALKIRIES) != DONE)

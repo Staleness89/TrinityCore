@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,7 @@
 #include "Group.h"
 #include "GroupMgr.h"
 #include "InstanceSaveMgr.h"
+#include "IpAddress.h"
 #include "Item.h"
 #include "Language.h"
 #include "Log.h"
@@ -50,7 +51,6 @@
 #include "WeatherMgr.h"
 #include "World.h"
 #include "WorldSession.h"
-#include <boost/asio/ip/address_v4.hpp>
 
 // temporary hack until includes are sorted out (don't want to pull in Windows.h)
 #ifdef GetClassName
@@ -257,8 +257,8 @@ public:
         Map2ZoneCoordinates(zoneX, zoneY, zoneId);
 
         Map const* map = object->GetMap();
-        float groundZ = map->GetHeight(object->GetPhaseMask(), object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
-        float floorZ = map->GetHeight(object->GetPhaseMask(), object->GetPositionX(), object->GetPositionY(), object->GetPositionZ());
+        float groundZ = object->GetMapHeight(object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+        float floorZ = object->GetMapHeight(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ());
 
         GridCoord gridCoord = Trinity::ComputeGridCoord(object->GetPositionX(), object->GetPositionY());
 
@@ -296,8 +296,7 @@ public:
             zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
         LiquidData liquidStatus;
-        ZLiquidStatus status = map->GetLiquidStatus(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), MAP_ALL_LIQUIDS, &liquidStatus);
-
+        ZLiquidStatus status = map->GetLiquidStatus(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), MAP_ALL_LIQUIDS, &liquidStatus, object->GetCollisionHeight());
         if (status)
             handler->PSendSysMessage(LANG_LIQUID_STATUS, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
 
@@ -637,9 +636,9 @@ public:
         if (target->IsAlive())
         {
             if (sWorld->getBoolConfig(CONFIG_DIE_COMMAND_MODE))
-                handler->GetSession()->GetPlayer()->Kill(target);
+                Unit::Kill(handler->GetSession()->GetPlayer(), target);
             else
-                handler->GetSession()->GetPlayer()->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                Unit::DealDamage(handler->GetSession()->GetPlayer(), target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
 
         return true;
@@ -1345,31 +1344,31 @@ public:
         TC_LOG_DEBUG("misc", handler->GetTrinityString(LANG_ADDITEMSET), itemSetId);
 
         bool found = false;
-        ItemTemplateContainer const* its = sObjectMgr->GetItemTemplateStore();
-        for (ItemTemplateContainer::const_iterator itr = its->begin(); itr != its->end(); ++itr)
+        ItemTemplateContainer const& its = sObjectMgr->GetItemTemplateStore();
+        for (auto const& itemTemplatePair : its)
         {
-            if (itr->second.ItemSet == itemSetId)
+            if (itemTemplatePair.second.ItemSet != itemSetId)
+                continue;
+
+            found = true;
+            ItemPosCountVec dest;
+            InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemTemplatePair.first, 1);
+            if (msg == EQUIP_ERR_OK)
             {
-                found = true;
-                ItemPosCountVec dest;
-                InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itr->second.ItemId, 1);
-                if (msg == EQUIP_ERR_OK)
-                {
-                    Item* item = playerTarget->StoreNewItem(dest, itr->second.ItemId, true);
+                Item* item = playerTarget->StoreNewItem(dest, itemTemplatePair.first, true);
 
-                    // remove binding (let GM give it to another player later)
-                    if (player == playerTarget)
-                        item->SetBinding(false);
+                // remove binding (let GM give it to another player later)
+                if (player == playerTarget)
+                    item->SetBinding(false);
 
-                    player->SendNewItem(item, 1, false, true);
-                    if (player != playerTarget)
-                        playerTarget->SendNewItem(item, 1, true, false);
-                }
-                else
-                {
-                    player->SendEquipError(msg, nullptr, nullptr, itr->second.ItemId);
-                    handler->PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itr->second.ItemId, 1);
-                }
+                player->SendNewItem(item, 1, false, true);
+                if (player != playerTarget)
+                    playerTarget->SendNewItem(item, 1, true, false);
+            }
+            else
+            {
+                player->SendEquipError(msg, nullptr, nullptr, itemTemplatePair.first);
+                handler->PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemTemplatePair.first, 1);
             }
         }
 
@@ -1703,7 +1702,7 @@ public:
                 lastIp    = fields[4].GetString();
                 lastLogin = fields[5].GetString();
 
-                uint32 ip = boost::asio::ip::address_v4::from_string(lastIp).to_ulong();
+                uint32 ip = Trinity::Net::address_to_uint(Trinity::Net::make_address_v4(lastIp));
                 EndianConvertReverse(ip);
 
                 // If ip2nation table is populated, it displays the country
@@ -1919,14 +1918,14 @@ public:
         Cell::VisitGridObjects(player, worker, player->GetGridActivationRange());
 
         // Now handle any that had despawned, but had respawn time logged.
-        RespawnVector data;
+        std::vector<RespawnInfo*> data;
         player->GetMap()->GetRespawnInfo(data, SPAWN_TYPEMASK_ALL, 0);
         if (!data.empty())
         {
             uint32 const gridId = Trinity::ComputeGridCoord(player->GetPositionX(), player->GetPositionY()).GetId();
             for (RespawnInfo* info : data)
                 if (info->gridId == gridId)
-                    player->GetMap()->RemoveRespawnTime(info, true);
+                    player->GetMap()->ForceRespawn(info->type, info->spawnId);
         }
 
         return true;
@@ -2337,9 +2336,9 @@ public:
         // flat melee damage without resistence/etc reduction
         if (!schoolStr)
         {
-            handler->GetSession()->GetPlayer()->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            Unit::DealDamage(handler->GetSession()->GetPlayer(), target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             if (target != handler->GetSession()->GetPlayer())
-                handler->GetSession()->GetPlayer()->SendAttackStateUpdate (HITINFO_AFFECTS_VICTIM, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_HIT, 0);
+                handler->GetSession()->GetPlayer()->SendAttackStateUpdate(HITINFO_AFFECTS_VICTIM, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_HIT, 0);
             return true;
         }
 
@@ -2350,7 +2349,7 @@ public:
         SpellSchoolMask schoolmask = SpellSchoolMask(1 << school);
 
         if (Unit::IsDamageReducedByArmor(schoolmask))
-            damage = handler->GetSession()->GetPlayer()->CalcArmorReducedDamage(target, damage, nullptr, BASE_ATTACK);
+            damage = Unit::CalcArmorReducedDamage(handler->GetSession()->GetPlayer(), target, damage, nullptr, BASE_ATTACK);
 
         char* spellStr = strtok((char*)nullptr, " ");
 
@@ -2359,7 +2358,7 @@ public:
         {
             Player* attacker = handler->GetSession()->GetPlayer();
             DamageInfo dmgInfo(attacker, target, damage, nullptr, schoolmask, SPELL_DIRECT_DAMAGE, BASE_ATTACK);
-            attacker->CalcAbsorbResist(dmgInfo);
+            Unit::CalcAbsorbResist(dmgInfo);
 
             if (!dmgInfo.GetDamage())
                 return true;
@@ -2368,8 +2367,8 @@ public:
 
             uint32 absorb = dmgInfo.GetAbsorb();
             uint32 resist = dmgInfo.GetResist();
-            attacker->DealDamageMods(target, damage, &absorb);
-            attacker->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, schoolmask, nullptr, false);
+            Unit::DealDamageMods(target, damage, &absorb);
+            Unit::DealDamage(attacker, target, damage, nullptr, DIRECT_DAMAGE, schoolmask, nullptr, false);
             attacker->SendAttackStateUpdate(HITINFO_AFFECTS_VICTIM, target, 0, schoolmask, damage, absorb, resist, VICTIMSTATE_HIT, 0);
             return true;
         }
@@ -2387,11 +2386,11 @@ public:
 
         Player* attacker = handler->GetSession()->GetPlayer();
         SpellNonMeleeDamage dmgInfo(attacker, target, spellid, spellInfo->GetSchoolMask());
-        damage = attacker->SpellDamageBonusDone(target, spellInfo, damage, SPELL_DIRECT_DAMAGE);
+        damage = attacker->SpellDamageBonusDone(target, spellInfo, damage, SPELL_DIRECT_DAMAGE, { });
         damage = target->SpellDamageBonusTaken(attacker, spellInfo, damage, SPELL_DIRECT_DAMAGE);
 
         attacker->CalculateSpellDamageTaken(&dmgInfo, damage, spellInfo);
-        attacker->DealDamageMods(dmgInfo.target, dmgInfo.damage, &dmgInfo.absorb);
+        Unit::DealDamageMods(dmgInfo.target, dmgInfo.damage, &dmgInfo.absorb);
         attacker->SendSpellNonMeleeDamageLog(&dmgInfo);
         attacker->DealSpellDamage(&dmgInfo, true);
         return true;
@@ -2423,7 +2422,6 @@ public:
             return false;
 
         target->CombatStop();
-        target->getHostileRefManager().deleteReferences();
         return true;
     }
 
