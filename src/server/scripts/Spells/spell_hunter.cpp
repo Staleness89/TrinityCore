@@ -67,7 +67,6 @@ enum HunterSpells
     SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R1       = 56654,
     SPELL_HUNTER_RAPID_RECUPERATION_ENERGY_R2       = 58882,
     SPELL_HUNTER_GLYPH_OF_MEND_PET_HAPPINESS        = 57894,
-    SPELL_HUNTER_GLYPH_OF_MEND_PET_HAPPINESS        = 57894,
     SPELL_HUNTER_EXPLOSIVE_SHOT_DAMAGE              = 53352,
     SPELL_HUNTER_FEEDING_FRENZY_BUFF_R1             = 60096,
     SPELL_HUNTER_FEEDING_FRENZY_BUFF_R2             = 60097
@@ -1469,13 +1468,10 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
                     if (AuraEffect const* explosiveShot = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_AURA_PERIODIC_DUMMY, SPELLFAMILY_HUNTER, 0x00000000, 0x80000000, 0x00000000, caster->GetGUID()))
                     {
                         // due to Lock and Load SpellInfo::CalcPowerCost might return 0, so just calculate it manually
-<<<<<<< HEAD
-                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetMaxPower(POWER_ENERGY), explosiveShot->GetSpellInfo()->ManaCostPercentage)), aurEff->GetAmount());
-=======
-                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetCreateMana(), explosiveShot->GetSpellInfo()->ManaCostPercentage)), aurEff->GetAmount());
+
+                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetMaxPower(POWER_ENERGY), explosiveShot->GetSpellInfo()->ManaCost)), aurEff->GetAmount());
 
                         ASSERT(explosiveShot->GetSpellInfo()->GetMaxTicks() > 0);
->>>>>>> 465b43fabef1727432ddda27f04b882b29fd2c7f
                         amount /= explosiveShot->GetSpellInfo()->GetMaxTicks();
                     }
                 }
