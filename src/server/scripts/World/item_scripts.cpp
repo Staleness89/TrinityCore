@@ -437,9 +437,6 @@ public:
 		if (!player->HasSkill(SKILL_LANG_COMMON))
 		{
 			player->LearnDefaultSkill(SKILL_LANG_COMMON, 300);
-			player->CastSpell(player, SPELL_LEARN_COMMON, true, item);
-			
-			player->DestroyItemCount(ITEM_COMMON_LANGUAGE, 1, true);
 			return true;
 		}
 		else
@@ -460,9 +457,6 @@ public:
 		if (!player->HasSkill(SKILL_LANG_ORCISH))
 		{
 			player->LearnDefaultSkill(SKILL_LANG_ORCISH, 300);
-			player->CastSpell(player, SPELL_LEARN_ORCISH, true, item);
-
-			player->DestroyItemCount(ITEM_ORCISH_LANGUAGE, 1, true);
 			return true;
 		}
 		else
