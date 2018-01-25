@@ -5581,16 +5581,13 @@ void ObjectMgr::LoadInstanceEncounters()
             continue;
         }
 
-        std::map<uint32, DungeonEncounterEntry const*>::const_iterator itr = dungeonLastBosses.find(lastEncounterDungeon);
-		
-        if (lastEncounterDungeon && !sLFGMgr->GetLFGDungeonEntry(lastEncounterDungeon))
+        if (lastEncounterDungeon)
         {
             TC_LOG_ERROR("sql.sql", "Table `instance_encounters` has an encounter %u (%s) marked as final for invalid dungeon id %u, skipped!", entry, dungeonEncounter->encounterName[0], lastEncounterDungeon);
             continue;
         }
 
         auto itr = dungeonLastBosses.find(lastEncounterDungeon);
-		
         if (lastEncounterDungeon)
         {
             if (itr != dungeonLastBosses.end())

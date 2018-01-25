@@ -170,18 +170,16 @@ class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
                 });
             }
 
-			void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-			{
-				PreventDefaultAction();
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
 
-				uint32 maxEnergy = GetTarget()->GetMaxPower(POWER_ENERGY);
-				int32 energy = CalculatePct(maxEnergy, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
+                uint32 maxEnergy = GetTarget()->GetMaxPower(POWER_ENERGY);
+                int32 energy = CalculatePct(maxEnergy, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
 
-				if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
-					AddPct(energy, glyph->GetAmount());
+                if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
+                    AddPct(energy, glyph->GetAmount());
 
-				GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, energy, GetTarget(), true, nullptr, aurEff);
-			}
                 CastSpellExtraArgs args(aurEff);
                 args.AddSpellBP0(energy);
                 GetTarget()->CastSpell(GetTarget(), SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, args);
@@ -438,14 +436,10 @@ class spell_hun_glyph_of_arcane_shot : public SpellScriptLoader
                 int32 energy = procSpell->CalcPowerCost(GetTarget(), procSpell->GetSchoolMask());
                 ApplyPct(energy, aurEff->GetAmount());
 
-<<<<<<< HEAD
-                GetTarget()->CastCustomSpell(SPELL_HUNTER_GLYPH_OF_ARCANE_SHOT, SPELLVALUE_BASE_POINT0, energy, GetTarget());
-=======
                 // castspell refactor note: this is not triggered - is this intended?
                 CastSpellExtraArgs args;
-                args.AddSpellBP0(mana);
+                args.AddSpellBP0(energy);
                 GetTarget()->CastSpell(GetTarget(), SPELL_HUNTER_GLYPH_OF_ARCANE_SHOT, args);
->>>>>>> 2c86c78f04f7cb95c201592b8d3002525eb6a46f
             }
 
             void Register() override
@@ -1135,15 +1129,9 @@ class spell_hun_rapid_recuperation : public SpellScriptLoader
                 PreventDefaultAction();
 
                 Unit* target = GetTarget();
-<<<<<<< HEAD
-                uint32 energy = CalculatePct(target->GetMaxPower(POWER_ENERGY), aurEff->GetAmount());
-
-                target->CastCustomSpell(GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, SPELLVALUE_BASE_POINT0, int32(energy), target, true, nullptr, aurEff);
-=======
                 CastSpellExtraArgs args(aurEff);
-                args.AddSpellBP0(CalculatePct(target->GetMaxPower(POWER_MANA), aurEff->GetAmount()));
+                args.AddSpellBP0(CalculatePct(target->GetMaxPower(POWER_ENERGY), aurEff->GetAmount()));
                 target->CastSpell(target, GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, args);
->>>>>>> 2c86c78f04f7cb95c201592b8d3002525eb6a46f
             }
 
             void Register() override
@@ -1519,8 +1507,7 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
                     if (AuraEffect const* explosiveShot = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_AURA_PERIODIC_DUMMY, SPELLFAMILY_HUNTER, 0x00000000, 0x80000000, 0x00000000, caster->GetGUID()))
                     {
                         // due to Lock and Load SpellInfo::CalcPowerCost might return 0, so just calculate it manually
-
-                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetMaxPower(POWER_ENERGY), explosiveShot->GetSpellInfo()->ManaCost)), aurEff->GetAmount());
+                        amount = CalculatePct(static_cast<int32>(CalculatePct(caster->GetCreateMana(), explosiveShot->GetSpellInfo()->ManaCostPercentage)), aurEff->GetAmount());
 
                         ASSERT(explosiveShot->GetSpellInfo()->GetMaxTicks() > 0);
                         amount /= explosiveShot->GetSpellInfo()->GetMaxTicks();
@@ -1532,13 +1519,9 @@ class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
                 if (!amount)
                     return;
 
-<<<<<<< HEAD
-                caster->CastCustomSpell(SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY, SPELLVALUE_BASE_POINT0, amount, (Unit*)nullptr, true, nullptr, aurEff);
-=======
                 CastSpellExtraArgs args(aurEff);
                 args.AddSpellBP0(amount);
-                caster->CastSpell(nullptr, SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA, args);
->>>>>>> 2c86c78f04f7cb95c201592b8d3002525eb6a46f
+                caster->CastSpell(nullptr, SPELL_HUNTER_THRILL_OF_THE_HUNT_ENERGY, args);
             }
 
             void Register() override

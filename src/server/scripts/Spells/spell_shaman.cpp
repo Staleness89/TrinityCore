@@ -2499,7 +2499,8 @@ public:
 			int32 basePoints0 = aurEff->GetAmount();
 			int32 basePoints1 = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue();
 
-			GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_FOCUSED_INSIGHT, &basePoints0, &basePoints1, &basePoints1, true, NULL, aurEff);
+			// fix
+            // GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_FOCUSED_INSIGHT, &basePoints0, &basePoints1, &basePoints1, true, NULL, aurEff);
 		}
 
 		void Register() override
@@ -2536,7 +2537,8 @@ public:
 			PreventDefaultAction();
 			int32 basePoints0 = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
 
-			GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TELLURIC_CURRENTS, &basePoints0, NULL, NULL, true);
+			// fix
+            // GetTarget()->CastCustomSpell(GetTarget(), SPELL_SHAMAN_TELLURIC_CURRENTS, &basePoints0, NULL, NULL, true);
 		}
 
 		void Register() override
