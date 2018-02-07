@@ -13409,6 +13409,11 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 27311;
 			else if (getRace() == RACE_FEL_ORC)
 				return 246;
+        case FORM_ALTEREDFORM:
+            if (getGender() == GENDER_MALE)
+                return 19723;
+            else if (getGender() == GENDER_FEMALE)
+                return 19724;
 		default:
 			break;
         }
