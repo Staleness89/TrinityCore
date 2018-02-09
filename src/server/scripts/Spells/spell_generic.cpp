@@ -1898,7 +1898,10 @@ class spell_gen_mount : public SpellScriptLoader
                     }
 
                     if (mount)
+                    {
+                        PreventHitAura();
                         target->CastSpell(target, mount, true);
+                    }
                 }
             }
 
