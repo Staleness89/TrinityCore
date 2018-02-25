@@ -538,20 +538,63 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         BattlegroundMap* ToBattlegroundMap() { if (IsBattlegroundOrArena()) return reinterpret_cast<BattlegroundMap*>(this); else return nullptr;  }
         BattlegroundMap const* ToBattlegroundMap() const { if (IsBattlegroundOrArena()) return reinterpret_cast<BattlegroundMap const*>(this); return nullptr; }
 
-        float GetWaterOrGroundLevel(uint32 phasemask, float x, float y, float z, float* ground = nullptr, bool swim = false, float collisionHeight = 2.03128f) const; // DEFAULT_COLLISION_HEIGHT in Object.h
+        // FLOOR, CEIL AND HEIGHT
+        float GetWaterOrGroundLevel(uint32 phasemask, float x, float y, float z, float* ground = nullptr, bool swim = false, float collisionHeight = 0.0f, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetMinHeight(float x, float y) const;
-        float GetHeight(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
-        float GetHeight(Position const& pos, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const { return GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist); }
-        float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const { return std::max<float>(GetHeight(x, y, z, vmap, maxSearchDist), GetGameObjectFloor(phasemask, x, y, z, maxSearchDist)); }
-        float GetHeight(uint32 phasemask, Position const& pos, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const { return GetHeight(phasemask, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist); }
+        float GetGridMapHeight(float x, float y) const;
+        float GetVMapFloor(float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const;
+        float GetHeight(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const;
+        float GetHeight(Position const& pos, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist, collisionHeight);
+        }
+
+        float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return std::max<float>(GetHeight(x, y, z, vmap, maxSearchDist, collisionHeight), GetGameObjectFloor(phasemask, x, y, z, maxSearchDist, collisionHeight));
+        }
+
+        float GetHeight(uint32 phasemask, Position const& pos, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return GetHeight(phasemask, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist, collisionHeight);
+        }
+
+        float GetCeil(uint32 phasemask, float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return std::min<float>(GetCeil(x, y, z, maxSearchDist, collisionHeight), GetGameObjectCeil(phasemask, x, y, z, maxSearchDist, collisionHeight));
+        }
+
+        float GetCeil(uint32 phasemask, Position const& pos, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return GetCeil(phasemask, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), maxSearchDist, collisionHeight);
+        }
+
+        float GetCeil(Position const& pos, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return GetCeil(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), maxSearchDist, collisionHeight);
+        }
+
+        float GetCeil(float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const;
+
+        float GetGameObjectCeil(uint32 phasemask, float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return _dynamicTree.getCeil(x, y, z + collisionHeight, maxSearchDist, phasemask);
+        }
+
+        float GetGameObjectCeil(uint32 phasemask, Position const& pos, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
+        {
+            return GetGameObjectCeil(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + collisionHeight, maxSearchDist, phasemask);
+        }
+
+        //
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask, LineOfSightChecks checks, VMAP::ModelIgnoreFlags ignoreFlags) const;
         void Balance() { _dynamicTree.balance(); }
         void RemoveGameObjectModel(GameObjectModel const& model) { _dynamicTree.remove(model); }
         void InsertGameObjectModel(GameObjectModel const& model) { _dynamicTree.insert(model); }
         bool ContainsGameObjectModel(GameObjectModel const& model) const { return _dynamicTree.contains(model);}
-        float GetGameObjectFloor(uint32 phasemask, float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const
+        float GetGameObjectFloor(uint32 phasemask, float x, float y, float z, float maxSearchDist = DEFAULT_HEIGHT_SEARCH, float collisionHeight = 0.0f) const
         {
-            return _dynamicTree.getHeight(x, y, z, maxSearchDist, phasemask);
+            return _dynamicTree.getHeight(x, y, z + collisionHeight, maxSearchDist, phasemask);
         }
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
 
@@ -795,10 +838,19 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         }
 
         SpawnGroupTemplateData const* GetSpawnGroupData(uint32 groupId) const;
-        bool SpawnGroupSpawn(uint32 groupId, bool ignoreRespawn = false, bool force = false, std::vector<WorldObject*>* spawnedObjects = nullptr);
-        bool SpawnGroupDespawn(uint32 groupId, bool deleteRespawnTimes = false, size_t* count = nullptr);
-        void SetSpawnGroupActive(uint32 groupId, bool state);
+
         bool IsSpawnGroupActive(uint32 groupId) const;
+
+        // Enable the spawn group, which causes all creatures in it to respawn (unless they have a respawn timer)
+        // The force flag can be used to force spawning additional copies even if old copies are still around from a previous spawn
+        bool SpawnGroupSpawn(uint32 groupId, bool ignoreRespawn = false, bool force = false, std::vector<WorldObject*>* spawnedObjects = nullptr);
+
+        // Despawn all creatures in the spawn group if spawned, optionally delete their respawn timer, and disable the group
+        bool SpawnGroupDespawn(uint32 groupId, bool deleteRespawnTimes = false, size_t* count = nullptr);
+
+        // Disable the spawn group, which prevents any creatures in the group from respawning until re-enabled
+        // This will not affect any already-present creatures in the group
+        void SetSpawnGroupInactive(uint32 groupId) { SetSpawnGroupActive(groupId, false); }
 
     private:
         // Type specific code for add/remove to/from grid
@@ -834,6 +886,8 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         RespawnInfoMap       _gameObjectRespawnTimesBySpawnId;
         RespawnInfoMap& GetRespawnMapForType(SpawnObjectType type) { return (type == SPAWN_TYPE_GAMEOBJECT) ? _gameObjectRespawnTimesBySpawnId : _creatureRespawnTimesBySpawnId; }
         RespawnInfoMap const& GetRespawnMapForType(SpawnObjectType type) const { return (type == SPAWN_TYPE_GAMEOBJECT) ? _gameObjectRespawnTimesBySpawnId : _creatureRespawnTimesBySpawnId; }
+
+        void SetSpawnGroupActive(uint32 groupId, bool state);
         std::unordered_set<uint32> _toggledSpawnGroupIds;
 
         uint32 _respawnCheckTimer;

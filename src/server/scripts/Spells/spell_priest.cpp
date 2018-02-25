@@ -738,34 +738,6 @@ class spell_pri_lightwell_renew : public SpellScriptLoader
         }
 };
 
-// 8129 - Mana Burn
-class spell_pri_mana_burn : public SpellScriptLoader
-{
-    public:
-        spell_pri_mana_burn() : SpellScriptLoader("spell_pri_mana_burn") { }
-
-        class spell_pri_mana_burn_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_mana_burn_SpellScript);
-
-            void HandleAfterHit()
-            {
-                if (Unit* unitTarget = GetHitUnit())
-                    unitTarget->RemoveAurasWithMechanic((1 << MECHANIC_FEAR) | (1 << MECHANIC_POLYMORPH));
-            }
-
-            void Register() override
-            {
-                AfterHit += SpellHitFn(spell_pri_mana_burn_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pri_mana_burn_SpellScript;
-        }
-};
-
 // 28305 - Mana Leech (Passive) (Priest Pet Aura)
 class spell_pri_mana_leech : public SpellScriptLoader
 {
@@ -1291,8 +1263,12 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                         if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                         {
                             // backfire damage
+                            int32 bp = aurEff->GetAmount();
+                            bp = target->SpellDamageBonusTaken(caster, aurEff->GetSpellInfo(), bp, DOT);
+                            bp *= 8;
+
                             CastSpellExtraArgs args(aurEff);
-                            args.AddSpellBP0(aurEff->GetAmount() * 8);
+                            args.AddSpellBP0(bp);
                             caster->CastSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, args);
                         }
                     }
@@ -1465,7 +1441,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_improved_spirit_tap();
     new spell_pri_item_t6_trinket();
     new spell_pri_lightwell_renew();
-    new spell_pri_mana_burn();
     new spell_pri_mana_leech();
     new spell_pri_mind_sear();
     new spell_pri_pain_and_suffering_dummy();

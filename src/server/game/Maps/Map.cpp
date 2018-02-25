@@ -2377,12 +2377,12 @@ inline GridMap* Map::GetGrid(float x, float y)
     return GridMaps[gx][gy];
 }
 
-float Map::GetWaterOrGroundLevel(uint32 phasemask, float x, float y, float z, float* ground /*= nullptr*/, bool /*swim = false*/, float collisionHeight /*= DEFAULT_COLLISION_HEIGHT*/) const
+float Map::GetWaterOrGroundLevel(uint32 phasemask, float x, float y, float z, float* ground /*= nullptr*/, bool /*swim = false*/, float collisionHeight /*= DEFAULT_COLLISION_HEIGHT*/, float maxSearchDist /*= DEFAULT_HEIGHT_SEARCH*/) const
 {
     if (const_cast<Map*>(this)->GetGrid(x, y))
     {
         // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeight(phasemask, x, y, z + collisionHeight, true, 50.0f);
+        float ground_z = GetHeight(phasemask, x, y, z, true, maxSearchDist, collisionHeight);
         if (ground)
             *ground = ground_z;
 
@@ -2403,30 +2403,22 @@ float Map::GetWaterOrGroundLevel(uint32 phasemask, float x, float y, float z, fl
     return VMAP_INVALID_HEIGHT_VALUE;
 }
 
-float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float maxSearchDist /*= DEFAULT_HEIGHT_SEARCH*/) const
+float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float maxSearchDist /*= DEFAULT_HEIGHT_SEARCH*/, float collisionHeight) const
 {
     // find raw .map surface under Z coordinates
-    float mapHeight = VMAP_INVALID_HEIGHT_VALUE;
-    if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
-    {
-        float gridHeight = gmap->getHeight(x, y);
-        if (z > gridHeight)
-            mapHeight = gridHeight;
-    }
+    float const gridHeight = GetGridMapHeight(x, y);
+    float mapHeight = z + collisionHeight > gridHeight ? gridHeight : VMAP_INVALID_HEIGHT_VALUE;
 
     float vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
     if (checkVMap)
-    {
-        VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-        if (vmgr->isHeightCalcEnabled())
-            vmapHeight = vmgr->getHeight(GetId(), x, y, z, maxSearchDist);
-    }
+        vmapHeight = GetVMapFloor(x, y, z, maxSearchDist, collisionHeight);
 
-    // mapHeight set for any above raw ground Z or <= INVALID_HEIGHT
-    // vmapheight set for any under Z value or <= INVALID_HEIGHT
-    if (vmapHeight > INVALID_HEIGHT)
+    bool const hasVmapFloor = vmapHeight > INVALID_HEIGHT;
+    bool const hasMapFloor = mapHeight > INVALID_HEIGHT;
+
+    if (hasVmapFloor)
     {
-        if (mapHeight > INVALID_HEIGHT)
+        if (hasMapFloor)
         {
             // we have mapheight and vmapheight and must select more appropriate
 
@@ -2441,7 +2433,7 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
             return vmapHeight;                              // we have only vmapHeight (if have)
     }
 
-    return mapHeight;                               // explicitly use map data
+    return gridHeight;                               // explicitly use map data
 }
 
 float Map::GetMinHeight(float x, float y) const
@@ -2450,6 +2442,19 @@ float Map::GetMinHeight(float x, float y) const
         return grid->getMinHeight(x, y);
 
     return -500.0f;
+}
+
+float Map::GetGridMapHeight(float x, float y) const
+{
+    if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        return gmap->getHeight(x, y);
+
+    return VMAP_INVALID_HEIGHT_VALUE;
+}
+
+float Map::GetVMapFloor(float x, float y, float z, float maxSearchDist, float collisionHeight) const
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->getHeight(GetId(), x, y, z + collisionHeight, maxSearchDist);
 }
 
 inline bool IsOutdoorWMO(uint32 mogpFlags, int32 /*adtId*/, int32 /*rootId*/, int32 /*groupId*/, WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
@@ -2771,6 +2776,11 @@ float Map::GetWaterLevel(float x, float y) const
         return 0;
 }
 
+float Map::GetCeil(float x, float y, float z, float maxSearchDist, float collisionHeight) const
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->getCeil(GetId(), x, y, z + collisionHeight, maxSearchDist);
+}
+
 bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask, LineOfSightChecks checks, VMAP::ModelIgnoreFlags ignoreFlags) const
 {
     if ((checks & LINEOFSIGHT_CHECK_VMAP)
@@ -2914,10 +2924,24 @@ void Map::SendObjectUpdates()
     }
 }
 
+// CheckRespawn MUST do one of the following:
+//  -) return true
+//  -) set info->respawnTime to zero, which indicates the respawn time should be deleted (and will never be processed again without outside intervention)
+//  -) set info->respawnTime to a new respawn time, which must be strictly GREATER than the current time (GameTime::GetGameTime())
 bool Map::CheckRespawn(RespawnInfo* info)
 {
+    SpawnData const* data = sObjectMgr->GetSpawnData(info->type, info->spawnId);
+    ASSERT(data, "Invalid respawn info with type %u, spawnID %u in respawn queue.", info->type, info->spawnId);
+
+    // First, check if this creature's spawn group is inactive
+    if (!IsSpawnGroupActive(data->spawnGroupData->groupId))
+    {
+        info->respawnTime = 0;
+        return false;
+    }
+
     uint32 poolId = info->spawnId ? sPoolMgr->IsPartOfAPool(info->type, info->spawnId) : 0;
-    // First, check if there's already an instance of this object that would block the respawn
+    // Next, check if there's already an instance of this object that would block the respawn
     // Only do this for unpooled spawns
     if (!poolId)
     {
@@ -2927,11 +2951,7 @@ bool Map::CheckRespawn(RespawnInfo* info)
             case SPAWN_TYPE_CREATURE:
             {
                 // escort check for creatures only (if the world config boolean is set)
-                bool isEscort = false;
-                if (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && info->type == SPAWN_TYPE_CREATURE)
-                    if (CreatureData const* cdata = sObjectMgr->GetCreatureData(info->spawnId))
-                        if (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC)
-                            isEscort = true;
+                bool const isEscort = (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && data->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC);
 
                 auto range = _creatureBySpawnIdStore.equal_range(info->spawnId);
                 for (auto it = range.first; it != range.second; ++it)
@@ -2993,15 +3013,7 @@ bool Map::CheckRespawn(RespawnInfo* info)
         return false;
     }
 
-    // if we're a creature, see if the script objects to us spawning
-    if (info->type == SPAWN_TYPE_CREATURE)
-    {
-        if (!sScriptMgr->CanSpawn(info->spawnId, info->entry, sObjectMgr->GetCreatureData(info->spawnId), this))
-        { // if a script blocks our respawn, schedule next check in a little bit
-            info->respawnTime = GameTime::GetGameTime() + urand(4, 7);
-            return false;
-        }
-    }
+    // everything ok, let's spawn
     return true;
 }
 
