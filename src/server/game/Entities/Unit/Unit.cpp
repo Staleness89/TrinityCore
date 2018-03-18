@@ -13351,9 +13351,9 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 27312;
 			else if (HasAura(58134))  // Glyph of Black wolf
 				return 27311;
-			else if (getRace() == RACE_FEL_ORC)
+			else if (getRace() == RACE_FEL_ORC) // Worgen Racial
 				return 246;
-        case FORM_ALTEREDFORM:
+        case FORM_ALTEREDFORM: // Worgen Two Forms
             if (getGender() == GENDER_MALE)
                 return 19723;
             else if (getGender() == GENDER_FEMALE)
