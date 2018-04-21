@@ -73,7 +73,14 @@ enum WarriorSpells
     SPELL_WARRIOR_T10_MELEE_4P_BONUS                = 70847,
     SPELL_WARRIOR_MORTAL_STRIKE                     = 12294,
     SPELL_WARRIOR_REND                              = 94009,
-	SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER            = 84583
+	SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER            = 84583,
+    SPELL_WARRIOR_VICTORIOUS                        = 32216,
+    SPELL_WARRIOR_FURIOUS_RUSH                      = 118779, // CHANGE ME
+    SPELL_WARRIOR_MIGHTY_RUSH                       = 118779, // CHANGE ME
+    SPELL_WARRIOR_DEFENSIVE_RUSH                    = 118779, // CHANGE ME
+    SPELL_WARRIOR_FURIOUS_RUSH_TALENT               = 84585,
+    SPELL_WARRIOR_MIGHTY_RUSH_TALENT                = 84586,
+    SPELL_WARRIOR_DEFENSIVE_RUSH_TALENT             = 84587
 };
 
 enum WarriorSpellIcons
@@ -1197,13 +1204,6 @@ public:
 	{
 		PrepareAuraScript(spell_warr_lambs_to_the_slaughter_AuraScript);
 
-		bool Validate(SpellInfo const* /*spellInfo*/) override
-		{
-			if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER))
-				return false;
-			return true;
-		}
-
 		void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
 		{
 			if (Aura* aur = eventInfo.GetProcTarget()->GetAura(SPELL_WARRIOR_REND, GetTarget()->GetGUID()))
@@ -1220,6 +1220,49 @@ public:
 	{
 		return new spell_warr_lambs_to_the_slaughter_AuraScript();
 	}
+};
+// 34428 - Victory Rush
+class spell_warr_victory_rush : public SpellScriptLoader
+{
+public:
+    spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
+
+    class spell_warr_victory_rush_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_victory_rush_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo
+            ({
+                SPELL_WARRIOR_VICTORIOUS
+                });
+        }
+
+        void HandleDummy()
+        {
+            Unit* caster = GetCaster();
+
+            if (caster->HasAura(SPELL_WARRIOR_DEFENSIVE_RUSH_TALENT))
+                caster->CastSpell(caster, SPELL_WARRIOR_DEFENSIVE_RUSH, true);
+            else if (caster->HasAura(SPELL_WARRIOR_MIGHTY_RUSH_TALENT))
+                caster->CastSpell(caster, SPELL_WARRIOR_MIGHTY_RUSH, true);
+            else if (caster->HasAura(SPELL_WARRIOR_FURIOUS_RUSH_TALENT))
+                caster->CastSpell(caster, SPELL_WARRIOR_FURIOUS_RUSH, true);
+
+            caster->RemoveAurasDueToSpell(SPELL_WARRIOR_VICTORIOUS);
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_warr_victory_rush_SpellScript();
+    }
 };
 
 void AddSC_warrior_spell_scripts()
