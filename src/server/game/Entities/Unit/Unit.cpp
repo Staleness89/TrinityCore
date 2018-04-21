@@ -12074,7 +12074,10 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
         {
 		case FORM_CAT:
 
-			if (HasAura(150218))  // Fangs of Ashamane
+             // Items
+            if (HasAura(150038))       // Fandral Flamescythe
+                return 38222;
+			else if (HasAura(150218))  // Fangs of Ashamane
 				return 70165;
 			else if (HasAura(150224))  // Ghost of the Pridemother
 				return 70170;
@@ -12085,12 +12088,16 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 			else if (HasAura(150230))  // Moonspirit
 				return 70147;
 
-			else if (HasAura(54912))    // Glyph of the Red lynx
-				return 15593;
-			else if (HasAura(58133))   // Glyph of the yellow lynx?
-				return 18167;
+            // Glyphs
+            if (HasAura(54912) && HasAura(58133))    // Glyph of the Red lynx
+                return (roll_chance_i(50) | 38123 | 38222);
+            else if (HasAura(54912))   // Glyph of the Red lynx?
+                return 15593;
+            else if (HasAura(58133))   // Glyph of the yellow lynx?
+                return 18167;
+
 			// Based on Hair color
-			else if (getRace() == RACE_NIGHTELF)
+			if (getRace() == RACE_NIGHTELF)
 			{
 				uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
 				switch (hairColor)
@@ -12231,7 +12238,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 8571;
 		case FORM_DIREBEAR:
 		case FORM_BEAR:
-
+             // Items
 			if (HasAura(150210)) // Claws of Ursoc
 				return 70150;
 			else if (HasAura(150212)) // Stonepaw
@@ -12244,6 +12251,14 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 70142;
 			else if (HasAura(150222)) // Guadian of the Glade
 				return 70141;
+
+             // Glyphs
+            if (HasAura(58132) && HasAura(54292))    // Both Glyphs
+                return (roll_chance_i(50) | 707 | 913);
+            if (HasAura(58132))      // Glyph of the Black Bear
+                return 707;
+            else if (HasAura(54292)) // Glyph of the White Bear
+                return 913;
 
 			// Based on Hair color
 			if (getRace() == RACE_NIGHTELF)
