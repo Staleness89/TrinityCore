@@ -12093,8 +12093,8 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 70147;
 
             // Glyphs
-            if (HasAura(54912) && HasAura(58133))    // Glyph of the Red lynx
-                return (roll_chance_i(50) | 38123 | 38222);
+          /* if (HasAura(54912) && HasAura(58133))    // Glyph of the Red lynx
+                return (roll_chance_i(50) | 38123 | 38222); */
             else if (HasAura(54912))   // Glyph of the Red lynx?
                 return 15593;
             else if (HasAura(58133))   // Glyph of the yellow lynx?
@@ -12257,8 +12257,8 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 				return 70141;
 
              // Glyphs
-            if (HasAura(58132) && HasAura(54292))    // Both Glyphs
-                return (roll_chance_i(50) | 707 | 913);
+          /*  if (HasAura(58132) && HasAura(54292))    // Both Glyphs
+                return (roll_chance_i(50) | 707 | 913); */
             if (HasAura(58132))      // Glyph of the Black Bear
                 return 707;
             else if (HasAura(54292)) // Glyph of the White Bear
