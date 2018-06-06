@@ -75,9 +75,9 @@ enum WarriorSpells
     SPELL_WARRIOR_REND                              = 94009,
 	SPELL_WARRIOR_LAMBS_TO_THE_SLAUGHTER            = 84583,
     SPELL_WARRIOR_VICTORIOUS                        = 32216,
-    SPELL_WARRIOR_FURIOUS_RUSH                      = 118779, // CHANGE ME
-    SPELL_WARRIOR_MIGHTY_RUSH                       = 118779, // CHANGE ME
-    SPELL_WARRIOR_DEFENSIVE_RUSH                    = 118779, // CHANGE ME
+    SPELL_WARRIOR_FURIOUS_RUSH                      = 642, // CHANGE ME
+    SPELL_WARRIOR_MIGHTY_RUSH                       = 642, // CHANGE ME
+    SPELL_WARRIOR_DEFENSIVE_RUSH                    = 642, // CHANGE ME
     SPELL_WARRIOR_FURIOUS_RUSH_TALENT               = 84585,
     SPELL_WARRIOR_MIGHTY_RUSH_TALENT                = 84586,
     SPELL_WARRIOR_DEFENSIVE_RUSH_TALENT             = 84587
