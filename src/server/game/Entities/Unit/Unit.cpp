@@ -9653,6 +9653,7 @@ void CharmInfo::InitPossessCreateSpells()
             case 24783: // Trained Rock Falcon
             case 27664: // Crashin' Thrashin' Racer
             case 40281: // Crashin' Thrashin' Racer
+            case 28511: // Eye of Acherus
                 break;
             default:
                 InitEmptyActionBar();
@@ -11824,7 +11825,7 @@ void Unit::SendPlaySpellVisual(uint32 id)
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);
     data << uint64(GetGUID());
     data << uint32(id); // SpellVisualKit.dbc index
-    SendMessageToSet(&data, false);
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SendPlaySpellImpact(ObjectGuid guid, uint32 id)
