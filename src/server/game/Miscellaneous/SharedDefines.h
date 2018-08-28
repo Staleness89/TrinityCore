@@ -2960,9 +2960,10 @@ enum SkillType
 	SKILL_LANG_GILNEAN = 791,
 	SKILL_LANG_GOBLIN = 792,
 	SKILL_LANG_PANDAREN = 793,
+    SKILL_RAID_MARKERS = 800
 };
 
-#define MAX_SKILL_TYPE               794
+#define MAX_SKILL_TYPE               801
 
 inline SkillType SkillByLockType(LockType locktype)
 {

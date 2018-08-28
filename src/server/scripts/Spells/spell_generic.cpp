@@ -4200,6 +4200,24 @@ class spell_gen_aura_two_forms : public AuraScript
     }
 };
 
+class spell_gen_raid_ui_fx : public SpellScript
+{
+	PrepareSpellScript(spell_gen_raid_ui_fx);
+
+	SpellCastResult CheckRequirement()
+	{
+		Unit* caster = GetCaster();
+
+		if (!caster->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER))
+			return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+		return SPELL_CAST_OK;
+	}
+
+	void Register() override
+	{
+		OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
+	}
+};
 
 void AddSC_generic_spell_scripts()
 {
@@ -4334,4 +4352,5 @@ void AddSC_generic_spell_scripts()
 	RegisterSpellScript(spell_gen_skill_update);
 	RegisterSpellScript(spell_gen_deathcharger_reins);
     RegisterAuraScript(spell_gen_aura_two_forms);
+	RegisterSpellScript(spell_gen_raid_ui_fx);
 }
