@@ -4164,42 +4164,6 @@ class spell_gen_deathcharger_reins : public SpellScript
 	}
 };
 
-enum AlteredFormDisplayIds
-{
-    MODEL_ALTERED_FORM_MALE   = 20707,
-    MODEL_ALTERED_FORM_FEMALE = 20708
-};
-
-class spell_gen_aura_two_forms : public AuraScript
-{
-    PrepareAuraScript(spell_gen_aura_two_forms);
-
-    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-    {
-        Unit* target = GetTarget();
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (target->getGender() == GENDER_MALE)
-                target->setTransForm(MODEL_ALTERED_FORM_MALE);
-            else
-                target->SetDisplayId(MODEL_ALTERED_FORM_FEMALE);
-        }
-    }
-
-    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-    {
-        Unit* target = GetTarget();
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            target->RestoreDisplayId();
-    }
-
-    void Register() override
-    {
-        AfterEffectApply += AuraEffectRemoveFn(spell_gen_aura_two_forms::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
-        AfterEffectRemove += AuraEffectRemoveFn(spell_gen_aura_two_forms::OnRemove, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
-    }
-};
-
 class spell_gen_raid_ui_fx : public SpellScript
 {
 	PrepareSpellScript(spell_gen_raid_ui_fx);
@@ -4351,6 +4315,5 @@ void AddSC_generic_spell_scripts()
     RegisterAuraScript(spell_gen_pony_mount_check);
 	RegisterSpellScript(spell_gen_skill_update);
 	RegisterSpellScript(spell_gen_deathcharger_reins);
-    RegisterAuraScript(spell_gen_aura_two_forms);
 	RegisterSpellScript(spell_gen_raid_ui_fx);
 }

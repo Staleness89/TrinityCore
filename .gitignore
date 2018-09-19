@@ -40,3 +40,4 @@ src/server/game/DungeonFinding/LFGQueue.h
 src/server/game/DungeonFinding/LFGScripts.cpp
 src/server/game/DungeonFinding/LFGScripts.h
 src/server/game/DungeonFinding/LFGMgr.cpp
+src/server/game/DungeonFinding/LFGMgr.cpp
