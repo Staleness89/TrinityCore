@@ -2763,14 +2763,7 @@ void Spell::DoSpellEffectHit(Unit* unit, uint8 effIndex, TargetInfo& hitInfo)
             bool refresh = false;
 
             // delayed spells with multiple targets need to create a new aura object, otherwise we'll access a deleted aura
-            if (m_spellInfo->Speed > 0.0f && !m_spellInfo->IsChanneled())
-            {
-                _spellAura = nullptr;
-                if (Aura* aura = unit->GetAura(m_spellInfo->Id, caster->GetGUID(), m_CastItem ? m_CastItem->GetGUID() : ObjectGuid::Empty, aura_effmask))
-                    _spellAura = aura->ToUnitAura();
-            }
-
-            if (!_spellAura)
+            if (!_spellAura || (m_spellInfo->Speed > 0.0f && !m_spellInfo->IsChanneled()))
             {
                 bool const resetPeriodicTimer = !(_triggeredCastFlags & TRIGGERED_DONT_RESET_PERIODIC_TIMER);
                 uint8 const allAuraEffectMask = Aura::BuildEffectMaskForOwner(hitInfo.AuraSpellInfo, MAX_EFFECT_MASK, unit);
@@ -2782,7 +2775,7 @@ void Spell::DoSpellEffectHit(Unit* unit, uint8 effIndex, TargetInfo& hitInfo)
                 createInfo
                     .SetCasterGUID(caster->GetGUID())
                     .SetBaseAmount(bp)
-                    .SetCastItem(m_CastItem)
+                    .SetCastItemGUID(m_CastItem ? m_CastItem->GetGUID() : ObjectGuid::Empty)
                     .SetPeriodicReset(resetPeriodicTimer)
                     .SetOwnerEffectMask(aura_effmask)
                     .IsRefresh = &refresh;
@@ -3645,7 +3638,13 @@ void Spell::_handle_finish_phase()
 
         // Real add combo points from effects
         if (m_comboTarget && m_comboPointGain)
+        {
+            // remove Premed-like effects unless they were caused by ourselves
+            // (this Aura removes the already-added CP when it expires from duration - now that we've added CP, this shouldn't happen anymore!)
+            if (!m_spellInfo->HasAura(SPELL_AURA_RETAIN_COMBO_POINTS))
+                unitCaster->RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
             unitCaster->AddComboPoints(m_comboTarget, m_comboPointGain);
+        }
 
         if (unitCaster->m_extraAttacks && m_spellInfo->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         {
@@ -4123,7 +4122,7 @@ void Spell::SendSpellStart()
     m_targets.Write(castData.Target);
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
-        castData.RemainingPower = ASSERT_NOTNULL(m_caster->ToUnit())->GetPower(static_cast<Powers>(m_spellInfo->PowerType));
+        castData.RemainingPower = ASSERT_NOTNULL(m_caster->ToUnit())->GetPower(m_spellInfo->PowerType);
 
     if (castFlags & CAST_FLAG_AMMO)
     {
@@ -4199,7 +4198,7 @@ void Spell::SendSpellGo()
     m_targets.Write(castData.Target);
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
-        castData.RemainingPower = ASSERT_NOTNULL(m_caster->ToUnit())->GetPower(static_cast<Powers>(m_spellInfo->PowerType));
+        castData.RemainingPower = ASSERT_NOTNULL(m_caster->ToUnit())->GetPower(m_spellInfo->PowerType);
 
     if (castFlags & CAST_FLAG_RUNE_LIST)                   // rune cooldowns list
     {
@@ -6396,7 +6395,7 @@ SpellCastResult Spell::CheckPower() const
     }
 
     // Check power amount
-    Powers powerType = Powers(m_spellInfo->PowerType);
+    Powers powerType = m_spellInfo->PowerType;
     if (int32(unitCaster->GetPower(powerType)) < m_powerCost)
         return SPELL_FAILED_NO_POWER;
     else
