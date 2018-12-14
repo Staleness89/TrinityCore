@@ -83,7 +83,6 @@ char constexpr ItemLimitCategoryEntryfmt[] = "nxxxxxxxxxxxxxxxxxii";
 char constexpr ItemRandomPropertiesfmt[] = "nxiiixxssssssssssssssssx";
 char constexpr ItemRandomSuffixfmt[] = "nssssssssssssssssxxiiixxiiixx";
 char constexpr ItemSetEntryfmt[] = "dssssssssssssssssxiiiiiiiiiixxxxxxxiiiiiiiiiiiiiiiiii";
-char constexpr LFGDungeonEntryfmt[] = "nssssssssssssssssxiiiiiiiiixxixixxxxxxxxxxxxxxxxx";
 char constexpr LightEntryfmt[] = "nifffxxxxxxxxxx";
 char constexpr LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char constexpr LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
