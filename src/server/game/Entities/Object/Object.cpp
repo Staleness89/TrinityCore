@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -688,12 +688,7 @@ void Object::SetFloatValue(uint16 index, float value)
 void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-
-    if (offset > 3)
-    {
-        TC_LOG_ERROR("misc", "Object::SetByteValue: wrong offset %u", offset);
-        return;
-    }
+    ASSERT(offset < 4);
 
     if (uint8(m_uint32Values[index] >> (offset * 8)) != value)
     {
@@ -709,12 +704,7 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-
-    if (offset > 1)
-    {
-        TC_LOG_ERROR("misc", "Object::SetUInt16Value: wrong offset %u", offset);
-        return;
-    }
+    ASSERT(offset < 2);
 
     if (uint16(m_uint32Values[index] >> (offset * 16)) != value)
     {
@@ -805,7 +795,6 @@ void Object::SetFlag(uint16 index, uint32 newFlag)
 void Object::RemoveFlag(uint16 index, uint32 oldFlag)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-    ASSERT(m_uint32Values);
 
     uint32 oldval = m_uint32Values[index];
     uint32 newval = oldval & ~oldFlag;
@@ -829,9 +818,7 @@ void Object::ToggleFlag(uint16 index, uint32 flag)
 
 bool Object::HasFlag(uint16 index, uint32 flag) const
 {
-    if (index >= m_valuesCount && !PrintIndexError(index, false))
-        return false;
-
+    ASSERT(index < m_valuesCount || PrintIndexError(index, true));
     return (m_uint32Values[index] & flag) != 0;
 }
 
@@ -843,12 +830,7 @@ void Object::ApplyModFlag(uint16 index, uint32 flag, bool apply)
 void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-
-    if (offset > 3)
-    {
-        TC_LOG_ERROR("misc", "Object::SetByteFlag: wrong offset %u", offset);
-        return;
-    }
+    ASSERT(offset < 4);
 
     if (!(uint8(m_uint32Values[index] >> (offset * 8)) & newFlag))
     {
@@ -862,12 +844,7 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, true));
-
-    if (offset > 3)
-    {
-        TC_LOG_ERROR("misc", "Object::RemoveByteFlag: wrong offset %u", offset);
-        return;
-    }
+    ASSERT(offset < 4);
 
     if (uint8(m_uint32Values[index] >> (offset * 8)) & oldFlag)
     {
@@ -1741,19 +1718,19 @@ void Unit::BuildHeartBeatMsg(WorldPacket* data) const
     BuildMovementPacket(data);
 }
 
-void WorldObject::SendMessageToSet(WorldPacket const* data, bool self)
+void WorldObject::SendMessageToSet(WorldPacket const* data, bool self) const
 {
     if (IsInWorld())
         SendMessageToSetInRange(data, GetVisibilityRange(), self);
 }
 
-void WorldObject::SendMessageToSetInRange(WorldPacket const* data, float dist, bool /*self*/)
+void WorldObject::SendMessageToSetInRange(WorldPacket const* data, float dist, bool /*self*/) const
 {
     Trinity::MessageDistDeliverer notifier(this, data, dist);
     Cell::VisitWorldObjects(this, notifier, dist);
 }
 
-void WorldObject::SendMessageToSet(WorldPacket const* data, Player const* skipped_rcvr)
+void WorldObject::SendMessageToSet(WorldPacket const* data, Player const* skipped_rcvr) const
 {
     Trinity::MessageDistDeliverer notifier(this, data, GetVisibilityRange(), false, skipped_rcvr);
     Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
@@ -2984,10 +2961,10 @@ bool WorldObject::IsValidAssistTarget(WorldObject const* target, SpellInfo const
     // PvP case
     if (unitTarget && unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
-        Player const* targetPlayerOwner = unitTarget->GetAffectingPlayer();
-        if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        if (unit && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
             Player const* selfPlayerOwner = GetAffectingPlayer();
+            Player const* targetPlayerOwner = unitTarget->GetAffectingPlayer();
             if (selfPlayerOwner && targetPlayerOwner)
             {
                 // can't assist player which is dueling someone
@@ -2995,7 +2972,7 @@ bool WorldObject::IsValidAssistTarget(WorldObject const* target, SpellInfo const
                     return false;
             }
             // can't assist player in ffa_pvp zone from outside
-            if (unitTarget->IsFFAPvP() && unit && !unit->IsFFAPvP())
+            if (unitTarget->IsFFAPvP() && !unit->IsFFAPvP())
                 return false;
 
             // can't assist player out of sanctuary from sanctuary if has pvp enabled
