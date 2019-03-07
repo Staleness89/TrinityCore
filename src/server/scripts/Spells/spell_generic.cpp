@@ -4185,6 +4185,7 @@ class spell_corrupting_plague_aura : public AuraScript
     }
 };
 
+<<<<<<< HEAD
 class spell_gen_skill_update : public SpellScript
 {
 	PrepareSpellScript(spell_gen_skill_update);
@@ -4260,6 +4261,49 @@ class spell_gen_raid_ui_fx : public SpellScript
 	{
 		OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
 	}
+=======
+// 34779 - Freezing Circle
+enum FreezingCircleSpells
+{
+    SPELL_FREEZING_CIRCLE_PIT_OF_SARON_NORMAL = 69574,
+    SPELL_FREEZING_CIRCLE_PIT_OF_SARON_HEROIC = 70276,
+    SPELL_FREEZING_CIRCLE                     = 34787,
+};
+
+class spell_freezing_circle : public SpellScript
+{
+    PrepareSpellScript(spell_freezing_circle);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_FREEZING_CIRCLE_PIT_OF_SARON_NORMAL,
+                SPELL_FREEZING_CIRCLE_PIT_OF_SARON_HEROIC,
+                SPELL_FREEZING_CIRCLE
+            });
+    }
+
+    void HandleDamage(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        uint32 spellId = 0;
+        Map* map = caster->GetMap();
+
+        if (map->IsDungeon())
+            spellId = map->IsHeroic() ? SPELL_FREEZING_CIRCLE_PIT_OF_SARON_HEROIC : SPELL_FREEZING_CIRCLE_PIT_OF_SARON_NORMAL;
+        else
+            spellId = SPELL_FREEZING_CIRCLE;
+
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+            SetHitDamage(spellInfo->Effects[EFFECT_0].CalcValue());
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_freezing_circle::HandleDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+>>>>>>> 70cefbe86616aa6411a85e1622c82c12a1ca67fa
 };
 
 void AddSC_generic_spell_scripts()
@@ -4394,7 +4438,11 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_gen_clear_debuffs);
     RegisterAuraScript(spell_gen_pony_mount_check);
     RegisterAuraScript(spell_corrupting_plague_aura);
+<<<<<<< HEAD
 	RegisterSpellScript(spell_gen_skill_update);
 	RegisterSpellScript(spell_gen_deathcharger_reins);
 	RegisterSpellScript(spell_gen_raid_ui_fx);
+=======
+    RegisterSpellScript(spell_freezing_circle);
+>>>>>>> 70cefbe86616aa6411a85e1622c82c12a1ca67fa
 }

@@ -23,7 +23,6 @@ SDCategory: howling_fjord
 EndScriptData */
 
 /* ContentData
-npc_plaguehound_tracker
 npc_apothecary_hanes
 EndContentData */
 
@@ -259,55 +258,6 @@ public:
 };
 
 /*######
-## npc_plaguehound_tracker
-######*/
-
-enum Plaguehound
-{
-    QUEST_SNIFF_OUT_ENEMY        = 11253
-};
-
-class npc_plaguehound_tracker : public CreatureScript
-{
-public:
-    npc_plaguehound_tracker() : CreatureScript("npc_plaguehound_tracker") { }
-
-    struct npc_plaguehound_trackerAI : public EscortAI
-    {
-        npc_plaguehound_trackerAI(Creature* creature) : EscortAI(creature) { }
-
-        void Reset() override
-        {
-            ObjectGuid summonerGUID;
-
-            if (me->IsSummon())
-                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                    if (summoner->GetTypeId() == TYPEID_PLAYER)
-                        summonerGUID = summoner->GetGUID();
-
-            if (!summonerGUID)
-                return;
-
-            me->SetWalk(true);
-            Start(false, false, summonerGUID);
-        }
-
-        void WaypointReached(uint32 waypointId, uint32 /*pathId*/) override
-        {
-            if (waypointId != 26)
-                return;
-
-            me->DespawnOrUnsummon();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_plaguehound_trackerAI(creature);
-    }
-};
-
-/*######
 ## npc_razael_and_lyana
 ######*/
 
@@ -406,6 +356,7 @@ enum Daegarnn
     NPC_PRISONER_1                  = 24253,  // looks the same but has different abilities
     NPC_PRISONER_2                  = 24254,
     NPC_PRISONER_3                  = 24255,
+    SAY_TEXT                        = 0
 };
 
 static float afSummon[] = {838.81f, -4678.06f, -94.182f};
@@ -432,10 +383,19 @@ public:
 
         bool bEventInProgress;
         ObjectGuid uiPlayerGUID;
+        TaskScheduler _scheduler;
 
         void Reset() override
         {
             Initialize();
+            _scheduler.Schedule(40s, [this](TaskContext sayContext)
+            {
+                if (!bEventInProgress)
+                {
+                    Talk(SAY_TEXT);
+                    sayContext.Repeat(40s);
+                }
+            });
         }
 
         void StartEvent(ObjectGuid uiGUID)
@@ -445,7 +405,17 @@ public:
 
             uiPlayerGUID = uiGUID;
 
+            bEventInProgress = true;
             SummonGladiator(NPC_FIRJUS);
+        }
+        
+        void UpdateAI(uint32 diff) override
+        {
+            if (bEventInProgress && !UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+            DoMeleeAttackIfReady();
         }
 
         void JustSummoned(Creature* summon) override
@@ -662,7 +632,6 @@ public:
 void AddSC_howling_fjord()
 {
     new npc_apothecary_hanes();
-    new npc_plaguehound_tracker();
     new npc_razael_and_lyana();
     new npc_daegarn();
     new npc_mindless_abomination();

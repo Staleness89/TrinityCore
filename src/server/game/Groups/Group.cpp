@@ -754,7 +754,7 @@ void Group::Disband(bool hideDestroy /* = false */)
 
         _homebindIfInstance(player);
     }
-    RollId.clear();
+
     m_memberSlots.clear();
 
     RemoveAllInvites();
