@@ -4185,83 +4185,6 @@ class spell_corrupting_plague_aura : public AuraScript
     }
 };
 
-<<<<<<< HEAD
-class spell_gen_skill_update : public SpellScript
-{
-	PrepareSpellScript(spell_gen_skill_update);
-
-	void HandleDummy(SpellEffIndex)
-	{
-		SpellInfo const* spellInfo = GetSpellInfo();
-		Player* target = GetHitPlayer();
-		target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
-	}
-
-	void Register() override
-	{
-		OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-	}
-};
-
-enum DeathchargerSpells
-{
-	SPELL_MOGRAINES_DEATHCHARGER  = 150245,
-	SPELL_TROLLBANES_DEATHCHARGER = 150244,
-	SPELL_NAZGRIMS_DEATHCHARGER   = 150243,
-	SPELL_WHITEMANES_DEATHCHARGER = 150242
-};
-
-class spell_gen_deathcharger_reins : public SpellScript
-{
-	PrepareSpellScript(spell_gen_deathcharger_reins);
-
-	void HandleDummy(SpellEffIndex)
-	{
-		Player* caster = GetCaster()->ToPlayer();
-
-		switch (urand(0,3))
-		{
-		    case 0:
-				caster->CastSpell(caster, SPELL_MOGRAINES_DEATHCHARGER, true);
-				break;
-			case 1:
-				caster->CastSpell(caster, SPELL_TROLLBANES_DEATHCHARGER, true);
-				break;
-			case 2:
-				caster->CastSpell(caster, SPELL_NAZGRIMS_DEATHCHARGER, true);
-				break;
-			case 3:
-				caster->CastSpell(caster, SPELL_WHITEMANES_DEATHCHARGER, true);
-				break;
-			default:
-				return;
-		}
-	}
-
-	void Register() override
-	{
-		OnEffectHitTarget += SpellEffectFn(spell_gen_deathcharger_reins::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-	}
-};
-
-class spell_gen_raid_ui_fx : public SpellScript
-{
-	PrepareSpellScript(spell_gen_raid_ui_fx);
-
-	SpellCastResult CheckRequirement()
-	{
-		Unit* caster = GetCaster();
-
-		if (!caster->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER))
-			return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-		return SPELL_CAST_OK;
-	}
-
-	void Register() override
-	{
-		OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
-	}
-=======
 // 34779 - Freezing Circle
 enum FreezingCircleSpells
 {
@@ -4303,7 +4226,83 @@ class spell_freezing_circle : public SpellScript
     {
         OnEffectHitTarget += SpellEffectFn(spell_freezing_circle::HandleDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
->>>>>>> 70cefbe86616aa6411a85e1622c82c12a1ca67fa
+};
+
+class spell_gen_skill_update : public SpellScript
+{
+    PrepareSpellScript(spell_gen_skill_update);
+
+    void HandleDummy(SpellEffIndex)
+    {
+        SpellInfo const* spellInfo = GetSpellInfo();
+        Player* target = GetHitPlayer();
+        target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_gen_skill_update::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+enum DeathchargerSpells
+{
+    SPELL_MOGRAINES_DEATHCHARGER = 150245,
+    SPELL_TROLLBANES_DEATHCHARGER = 150244,
+    SPELL_NAZGRIMS_DEATHCHARGER = 150243,
+    SPELL_WHITEMANES_DEATHCHARGER = 150242
+};
+
+class spell_gen_deathcharger_reins : public SpellScript
+{
+    PrepareSpellScript(spell_gen_deathcharger_reins);
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Player* caster = GetCaster()->ToPlayer();
+
+        switch (urand(0, 3))
+        {
+        case 0:
+            caster->CastSpell(caster, SPELL_MOGRAINES_DEATHCHARGER, true);
+            break;
+        case 1:
+            caster->CastSpell(caster, SPELL_TROLLBANES_DEATHCHARGER, true);
+            break;
+        case 2:
+            caster->CastSpell(caster, SPELL_NAZGRIMS_DEATHCHARGER, true);
+            break;
+        case 3:
+            caster->CastSpell(caster, SPELL_WHITEMANES_DEATHCHARGER, true);
+            break;
+        default:
+            return;
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_gen_deathcharger_reins::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+class spell_gen_raid_ui_fx : public SpellScript
+{
+    PrepareSpellScript(spell_gen_raid_ui_fx);
+
+    SpellCastResult CheckRequirement()
+    {
+        Unit* caster = GetCaster();
+
+        if (!caster->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER))
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
+    }
 };
 
 void AddSC_generic_spell_scripts()
@@ -4438,11 +4437,8 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_gen_clear_debuffs);
     RegisterAuraScript(spell_gen_pony_mount_check);
     RegisterAuraScript(spell_corrupting_plague_aura);
-<<<<<<< HEAD
-	RegisterSpellScript(spell_gen_skill_update);
-	RegisterSpellScript(spell_gen_deathcharger_reins);
-	RegisterSpellScript(spell_gen_raid_ui_fx);
-=======
     RegisterSpellScript(spell_freezing_circle);
->>>>>>> 70cefbe86616aa6411a85e1622c82c12a1ca67fa
+    RegisterSpellScript(spell_gen_skill_update);
+    RegisterSpellScript(spell_gen_deathcharger_reins);
+    RegisterSpellScript(spell_gen_raid_ui_fx);
 }
