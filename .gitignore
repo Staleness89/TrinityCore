@@ -56,3 +56,5 @@ src/server/game/DungeonFinding/LFGScripts.cpp
 src/server/game/DungeonFinding/LFGScripts.h
 src/server/game/Handlers/LFGHandler.cpp
 src/server/scripts/Commands/cs_lfg.cpp
+src/server/game/DungeonFinding/LFGMgr.cpp
+src/server/game/DungeonFinding/LFGGroupData.cpp
