@@ -346,11 +346,69 @@ struct npc_pet_gen_soul_trader : public ScriptedAI
     }
 };
 
+enum SingingSunflowerMisc
+{
+    SPELL_SUNFLOWER_SONG = 93972
+};
+
+class npc_pet_gen_singing_sunflower : public CreatureScript
+{
+public:
+    npc_pet_gen_singing_sunflower() : CreatureScript("npc_pet_gen_singing_sunflower") {}
+
+    struct npc_pet_gen_singing_sunflowerAI : public NullCreatureAI
+    {
+        npc_pet_gen_singing_sunflowerAI(Creature* creature) : NullCreatureAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            SingSongTimer = urand(1000000,2000000);
+        }
+
+        uint32 SingSongTimer;
+
+        void Reset() override
+        {
+            if (Unit* owner = me->GetCharmerOrOwner())
+                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle());
+        }
+
+        void EnterEvadeMode(EvadeReason why) override
+        {
+            if (!_EnterEvadeMode(why))
+                return;
+
+            Reset();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (SingSongTimer <= diff)
+            {
+                me->CastSpell(me, SPELL_SUNFLOWER_SONG);
+                SingSongTimer = urand(1000000, 2000000);
+                return;
+            }
+            else
+                SingSongTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_pet_gen_singing_sunflowerAI(creature);
+    }
+};
+
 void AddSC_generic_pet_scripts()
 {
     new npc_pet_gen_baby_blizzard_bear();
     new npc_pet_gen_egbert();
     new npc_pet_gen_pandaren_monk();
     new npc_pet_gen_mojo();
+    new npc_pet_gen_singing_sunflower();
     RegisterCreatureAI(npc_pet_gen_soul_trader);
 }
