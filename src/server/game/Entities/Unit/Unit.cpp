@@ -12438,18 +12438,19 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 			else
 				return 29781;
 		case FORM_TREE:  // TREE FORM
-			if (getRace() == RACE_NIGHTELF)
-				return 37165;
-			else if (getRace() == RACE_TROLL)
-				return 37163;
-			else if (getRace() == RACE_TAUREN)
-				return 37166;
-			else if (getRace() == RACE_FEL_ORC)
-				return 37164;
-			else if (Player::TeamForRace(getRace()) == ALLIANCE)
-				return 37165;
-			else
-				return 37163;
+            if (!HasAura(150232))  // Glyph of the Treant
+                return 2257;
+            else
+            {
+                if (getRace() == RACE_NIGHTELF)
+                    return 37165;
+                else if (getRace() == RACE_TROLL)
+                    return 37163;
+                else if (getRace() == RACE_TAUREN)
+                    return 37166;
+                else if (getRace() == RACE_FEL_ORC)
+                    return 37164;
+            }
 		case FORM_TRAVEL: // TRAVEL FORM
 			if (HasAura(150010))  // Glyph of the Stag
 			{
