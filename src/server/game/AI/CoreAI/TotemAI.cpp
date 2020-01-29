@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -34,16 +33,9 @@ int32 TotemAI::Permissible(Creature const* creature)
     return PERMIT_BASE_NO;
 }
 
-TotemAI::TotemAI(Creature* creature) : CreatureAI(creature), _victimGUID()
+TotemAI::TotemAI(Creature* creature) : NullCreatureAI(creature), _victimGUID()
 {
-    ASSERT(creature->IsTotem(), "TotemAI: AI assigned to a no-totem creature (%s)!", creature->GetGUID().ToString().c_str());
-}
-
-void TotemAI::MoveInLineOfSight(Unit* /*who*/) { }
-
-void TotemAI::EnterEvadeMode(EvadeReason /*why*/)
-{
-    me->CombatStop(true);
+    ASSERT(creature->IsTotem(), "TotemAI: AI assigned to a non-totem creature (%s)!", creature->GetGUID().ToString().c_str());
 }
 
 void TotemAI::UpdateAI(uint32 /*diff*/)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "CombatAI.h"
 #include "CreatureTextMgr.h"
+#include "G3DPosition.hpp"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "Log.h"
@@ -42,8 +43,7 @@
 
 enum UnworthyInitiate
 {
-    SPELL_SOUL_PRISON_CHAIN_SELF    = 54612,
-    SPELL_SOUL_PRISON_CHAIN         = 54613,
+    SPELL_SOUL_PRISON_CHAIN         = 54612,
     SPELL_DK_INITIATE_VISUAL        = 51519,
 
     SPELL_ICY_TOUCH                 = 52372,
@@ -169,7 +169,6 @@ public:
             phase = PHASE_TO_EQUIP;
 
             me->SetStandState(UNIT_STAND_STATE_STAND);
-            me->RemoveAurasDueToSpell(SPELL_SOUL_PRISON_CHAIN_SELF);
             me->RemoveAurasDueToSpell(SPELL_SOUL_PRISON_CHAIN);
 
             float z;
@@ -395,107 +394,123 @@ class spell_death_knight_initiate_visual : public SpellScript
     }
 };
 
- /*######
+/*######
 ## npc_eye_of_acherus
 ######*/
 
-enum EyeOfAcherus
+enum EyeOfAcherusMisc
 {
-    SPELL_EYE_VISUAL            = 51892,
-    SPELL_EYE_FLIGHT_BOOST      = 51923,
-    SPELL_EYE_FLIGHT            = 51890,
+    SPELL_THE_EYE_OF_ACHERUS                = 51852,
+    SPELL_EYE_OF_ACHERUS_VISUAL             = 51892,
+    SPELL_EYE_OF_ACHERUS_FLIGHT_BOOST       = 51923,
+    SPELL_EYE_OF_ACHERUS_FLIGHT             = 51890,
+    SPELL_ROOT_SELF                         = 51860,
 
-    EVENT_MOVE_START            = 1,
+    EVENT_ANNOUNCE_LAUNCH_TO_DESTINATION    = 1,
+    EVENT_UNROOT                            = 2,
+    EVENT_LAUNCH_TOWARDS_DESTINATION        = 3,
+    EVENT_GRANT_CONTROL                     = 4,
 
-    TALK_MOVE_START             = 0,
-    TALK_CONTROL                = 1,
+    SAY_LAUNCH_TOWARDS_DESTINATION          = 0,
+    SAY_EYE_UNDER_CONTROL                   = 1,
 
-    POINT_EYE_FALL              = 1,
-    POINT_EYE_MOVE_END          = 3
+    POINT_NEW_AVALON                        = 1
 };
 
-Position const EyeOFAcherusFallPoint = { 2361.21f, -5660.45f, 496.7444f, 0.0f };
-
-class npc_eye_of_acherus : public CreatureScript
+static constexpr uint8 const EyeOfAcherusPathSize = 4;
+G3D::Vector3 const EyeOfAcherusPath[EyeOfAcherusPathSize] =
 {
-    public:
-        npc_eye_of_acherus() : CreatureScript("npc_eye_of_acherus") { }
+    { 2361.21f,  -5660.45f,  496.744f  },
+    { 2341.571f, -5672.797f, 538.3942f },
+    { 1957.4f,   -5844.1f,   273.867f  },
+    { 1758.01f,  -5876.79f,  166.867f  }
+};
 
-        struct npc_eye_of_acherusAI : public ScriptedAI
+struct npc_eye_of_acherus : public ScriptedAI
+{
+    npc_eye_of_acherus(Creature* creature) : ScriptedAI(creature)
+    {
+        creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid1);
+        creature->SetReactState(REACT_PASSIVE);
+    }
+
+    void JustAppeared() override
+    {
+        DoCastSelf(SPELL_ROOT_SELF);
+        DoCastSelf(SPELL_EYE_OF_ACHERUS_VISUAL);
+        _events.ScheduleEvent(EVENT_ANNOUNCE_LAUNCH_TO_DESTINATION, 7s);
+    }
+
+    void OnCharmed(bool apply) override
+    {
+        if (!apply)
         {
-            npc_eye_of_acherusAI(Creature* creature) : ScriptedAI(creature)
-            {
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
-                DoCastSelf(SPELL_EYE_VISUAL);
-                me->SetReactState(REACT_PASSIVE);
-                me->SetDisableGravity(true);
-                me->SetControlled(true, UNIT_STATE_ROOT);
-
-                Movement::MoveSplineInit init(me);
-                init.MoveTo(EyeOFAcherusFallPoint.GetPositionX(), EyeOFAcherusFallPoint.GetPositionY(), EyeOFAcherusFallPoint.GetPositionZ(), false);
-                init.SetFall();
-                me->GetMotionMaster()->LaunchMoveSpline(std::move(init), POINT_EYE_FALL, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
-
-                _events.ScheduleEvent(EVENT_MOVE_START, 7s);
-            }
-
-            void OnCharmed(bool /*isNew*/) override { }
-
-            void UpdateAI(uint32 diff) override
-            {
-                _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_MOVE_START:
-                        {
-                            DoCastSelf(SPELL_EYE_FLIGHT_BOOST);
-                            me->SetControlled(false, UNIT_STATE_ROOT);
-
-                            if (Player* owner = me->GetCharmerOrOwner()->ToPlayer())
-                            {
-                                for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                                    me->SetSpeedRate(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)));
-                                Talk(TALK_MOVE_START, owner);
-                            }
-                            me->GetMotionMaster()->MovePath(me->GetEntry() * 100, false);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            void MovementInform(uint32 movementType, uint32 pointId) override
-            {
-                if (movementType == WAYPOINT_MOTION_TYPE && pointId == POINT_EYE_MOVE_END - 1)
-                {
-                    me->RemoveAllAuras();
-
-                    if (Player* owner = me->GetCharmerOrOwner()->ToPlayer())
-                    {
-                        owner->RemoveAura(SPELL_EYE_FLIGHT_BOOST);
-                        for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                            me->SetSpeedRate(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)));
-
-                        Talk(TALK_CONTROL, owner);
-                    }
-                    me->SetDisableGravity(false);
-                    DoCastSelf(SPELL_EYE_FLIGHT);
-                }
-            }
-
-        private:
-            EventMap _events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return new npc_eye_of_acherusAI(creature);
+            me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_THE_EYE_OF_ACHERUS);
+            me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_EYE_OF_ACHERUS_FLIGHT_BOOST);
         }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_ANNOUNCE_LAUNCH_TO_DESTINATION:
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                        Talk(SAY_LAUNCH_TOWARDS_DESTINATION, owner);
+                    _events.ScheduleEvent(EVENT_UNROOT, 1s + 200ms);
+                    break;
+                case EVENT_UNROOT:
+                    me->RemoveAurasDueToSpell(SPELL_ROOT_SELF);
+                    DoCastSelf(SPELL_EYE_OF_ACHERUS_FLIGHT_BOOST);
+                    _events.ScheduleEvent(EVENT_LAUNCH_TOWARDS_DESTINATION, 1s + 200ms);
+                    break;
+                case EVENT_LAUNCH_TOWARDS_DESTINATION:
+                {
+                    Movement::PointsArray path(EyeOfAcherusPath, EyeOfAcherusPath + EyeOfAcherusPathSize);
+                    Movement::MoveSplineInit init(me);
+                    init.MovebyPath(path);
+                    init.SetFly();
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                        init.SetVelocity(owner->GetSpeed(MOVE_RUN));
+
+                    me->GetMotionMaster()->LaunchMoveSpline(std::move(init), POINT_NEW_AVALON, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
+                    break;
+                }
+                case EVENT_GRANT_CONTROL:
+                    me->RemoveAurasDueToSpell(SPELL_ROOT_SELF);
+                    DoCastSelf(SPELL_EYE_OF_ACHERUS_FLIGHT);
+                    me->RemoveAurasDueToSpell(SPELL_EYE_OF_ACHERUS_FLIGHT_BOOST);
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                        Talk(SAY_EYE_UNDER_CONTROL, owner);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    void MovementInform(uint32 movementType, uint32 pointId) override
+    {
+        if (movementType != POINT_MOTION_TYPE)
+            return;
+
+        switch (pointId)
+        {
+            case POINT_NEW_AVALON:
+                DoCastSelf(SPELL_ROOT_SELF);
+                _events.ScheduleEvent(EVENT_GRANT_CONTROL, 2s + 500ms);
+                break;
+            default:
+                break;
+        }
+    }
+
+private:
+    EventMap _events;
 };
 
 /*######
@@ -552,7 +567,7 @@ public:
 
             me->RestoreFaction();
             CombatAI::Reset();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
         }
 
         void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
@@ -644,7 +659,7 @@ public:
                     return true;
 
                 me->SetImmuneToPC(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
 
                 player->CastSpell(me, SPELL_DUEL, false);
                 player->CastSpell(player, SPELL_DUEL_FLAG, true);
@@ -923,7 +938,7 @@ public:
             {
                 deathcharger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 deathcharger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                deathcharger->SetFaction(2096);
+                deathcharger->SetFaction(FACTION_SCARLET_CRUSADE_2);
             }
         }
     };
@@ -1291,7 +1306,7 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_unworthy_initiate_anchor();
     new go_acherus_soul_prison();
     RegisterSpellScript(spell_death_knight_initiate_visual);
-    new npc_eye_of_acherus();
+    RegisterCreatureAI(npc_eye_of_acherus);
     new npc_death_knight_initiate();
     RegisterCreatureAI(npc_dark_rider_of_acherus);
     new npc_salanar_the_horseman();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,7 +28,6 @@ enum WorldDatabaseStatements : uint32
         name for a suiting suffix.
     */
 
-    WORLD_SEL_QUEST_POOLS,
     WORLD_DEL_LINKED_RESPAWN,
     WORLD_DEL_LINKED_RESPAWN_MASTER,
     WORLD_REP_LINKED_RESPAWN,

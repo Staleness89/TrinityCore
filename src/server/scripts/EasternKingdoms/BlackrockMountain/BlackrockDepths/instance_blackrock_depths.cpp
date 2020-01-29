@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -33,19 +32,19 @@
 
 enum Creatures
 {
-    NPC_EMPEROR             = 9019,
-    NPC_PHALANX             = 9502,
-    NPC_ANGERREL            = 9035,
-    NPC_DOPEREL             = 9040,
-    NPC_HATEREL             = 9034,
-    NPC_VILEREL             = 9036,
-    NPC_SEETHREL            = 9038,
-    NPC_GLOOMREL            = 9037,
-    NPC_DOOMREL             = 9039,
-    NPC_MAGMUS              = 9938,
-    NPC_MOIRA               = 8929,
+    NPC_EMPEROR              = 9019,
+    NPC_PHALANX              = 9502,
+    NPC_ANGERREL             = 9035,
+    NPC_DOPEREL              = 9040,
+    NPC_HATEREL              = 9034,
+    NPC_VILEREL              = 9036,
+    NPC_SEETHREL             = 9038,
+    NPC_GLOOMREL             = 9037,
+    NPC_DOOMREL              = 9039,
+    NPC_MAGMUS               = 9938,
+    NPC_MOIRA                = 8929,
     NPC_PRIESTESS_THAURISSAN = 10076,
-    NPC_COREN               = 23872
+    NPC_COREN                = 23872,
 };
 
 enum GameObjects
@@ -395,16 +394,9 @@ public:
                 if (Creature* boss = instance->GetCreature(TombBossGUIDs[i]))
                 {
                     if (!boss->IsAlive())
-                    {//do not call EnterEvadeMode(), it will create infinit loops
                         boss->Respawn();
-                        boss->RemoveAllAuras();
-                        boss->GetThreatManager().ClearAllThreat();
-                        boss->CombatStop(true);
-                        boss->LoadCreaturesAddon();
-                        boss->GetMotionMaster()->MoveTargetedHome();
-                        boss->SetLootRecipient(nullptr);
-                    }
-                    boss->SetFaction(FACTION_FRIENDLY);
+                    else
+                        boss->SetFaction(FACTION_FRIENDLY);
                 }
             }
             GhostKillCount = 0;

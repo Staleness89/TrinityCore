@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -33,6 +33,18 @@ DoorData const doorData[] =
     { 0,                 0,                        DOOR_TYPE_ROOM } // END
 };
 
+ObjectData const creatureData[] =
+{
+    { NPC_BROGGOK,             DATA_BROGGOK             },
+    { 0,                       0                        } // END
+};
+
+ObjectData const gameObjectData[] =
+{
+    { GO_BROGGOK_LEVER,      DATA_BROGGOK_LEVER },
+    { 0,                     0                  } //END
+};
+
 class instance_blood_furnace : public InstanceMapScript
 {
     public:
@@ -45,6 +57,7 @@ class instance_blood_furnace : public InstanceMapScript
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
+                LoadObjectData(creatureData, gameObjectData);
 
                 PrisonerCounter5        = 0;
                 PrisonerCounter6        = 0;
@@ -54,6 +67,8 @@ class instance_blood_furnace : public InstanceMapScript
 
             void OnCreatureCreate(Creature* creature) override
             {
+                InstanceScript::OnCreatureCreate(creature);
+
                 switch (creature->GetEntry())
                 {
                     case NPC_THE_MAKER:
@@ -153,8 +168,6 @@ class instance_blood_furnace : public InstanceMapScript
                                 break;
                             case NOT_STARTED:
                                 ResetPrisons();
-                                if (GameObject* lever = instance->GetGameObject(BroggokLeverGUID))
-                                    lever->Respawn();
                                 break;
                             default:
                                 break;
@@ -169,28 +182,39 @@ class instance_blood_furnace : public InstanceMapScript
 
             void ResetPrisons()
             {
-                PrisonerCounter5 = PrisonersCell5.size();
                 ResetPrisoners(PrisonersCell5);
+                PrisonerCounter5 = PrisonersCell5.size();
                 HandleGameObject(PrisonCellGUIDs[DATA_PRISON_CELL5 - DATA_PRISON_CELL1], false);
 
-                PrisonerCounter6 = PrisonersCell6.size();
                 ResetPrisoners(PrisonersCell6);
+                PrisonerCounter6 = PrisonersCell6.size();
                 HandleGameObject(PrisonCellGUIDs[DATA_PRISON_CELL6 - DATA_PRISON_CELL1], false);
 
-                PrisonerCounter7 = PrisonersCell7.size();
                 ResetPrisoners(PrisonersCell7);
+                PrisonerCounter7 = PrisonersCell7.size();
                 HandleGameObject(PrisonCellGUIDs[DATA_PRISON_CELL7 - DATA_PRISON_CELL1], false);
 
-                PrisonerCounter8 = PrisonersCell8.size();
                 ResetPrisoners(PrisonersCell8);
+                PrisonerCounter8 = PrisonersCell8.size();
                 HandleGameObject(PrisonCellGUIDs[DATA_PRISON_CELL8 - DATA_PRISON_CELL1], false);
             }
 
-            void ResetPrisoners(GuidSet const& prisoners)
+            void ResetPrisoners(GuidSet& prisoners)
             {
-                for (GuidSet::const_iterator i = prisoners.begin(); i != prisoners.end(); ++i)
-                    if (Creature* prisoner = instance->GetCreature(*i))
+                for (GuidSet::const_iterator i = prisoners.begin(); i != prisoners.end();)
+                {
+                    if (Creature * prisoner = instance->GetCreature(*i))
+                    {
+                        if (!prisoner->IsAlive())
+                            i = prisoners.erase(i);
+                        else
+                            ++i;
+
                         ResetPrisoner(prisoner);
+                    }
+                    else
+                        ++i;
+                }
             }
 
             void ResetPrisoner(Creature* prisoner)
@@ -199,6 +223,8 @@ class instance_blood_furnace : public InstanceMapScript
                     prisoner->Respawn(true);
                 prisoner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 prisoner->SetImmuneToAll(true);
+                if (prisoner->IsAIEnabled())
+                    prisoner->AI()->EnterEvadeMode();
             }
 
             void StorePrisoner(Creature* creature)

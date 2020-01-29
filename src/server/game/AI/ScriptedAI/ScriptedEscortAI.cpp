@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -96,9 +95,10 @@ void EscortAI::ReturnToLastPoint()
 void EscortAI::EnterEvadeMode(EvadeReason /*why*/)
 {
     me->RemoveAllAuras();
-    me->GetThreatManager().ClearAllThreat();
     me->CombatStop(true);
     me->SetLootRecipient(nullptr);
+    
+    EngagementOver();
 
     if (HasEscortState(STATE_ESCORT_ESCORTING))
     {
@@ -229,7 +229,7 @@ void EscortAI::UpdateAI(uint32 diff)
                     if (!isEscort)
                       me->DespawnOrUnsummon(0, 1s);
                     else
-                      me->GetMap()->RemoveRespawnTime(SPAWN_TYPE_CREATURE, me->GetSpawnId(), true);
+                      me->GetMap()->Respawn(SPAWN_TYPE_CREATURE, me->GetSpawnId());
                 }
                 else
                     me->DespawnOrUnsummon();
@@ -282,14 +282,8 @@ void EscortAI::Start(bool isActiveAttacker /* = true*/, bool run /* = false */, 
     {
         if (CreatureData const* cdata = me->GetCreatureData())
         {
-            if (SpawnGroupTemplateData const* groupdata = cdata->spawnGroupData)
-            {
-                if (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && (groupdata->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC) && !map->GetCreatureRespawnTime(me->GetSpawnId()))
-                {
-                    me->SetRespawnTime(me->GetRespawnDelay());
-                    me->SaveRespawnTime();
-                }
-            }
+            if (sWorld->getBoolConfig(CONFIG_RESPAWN_DYNAMIC_ESCORTNPC) && (cdata->spawnGroupData->flags & SPAWNGROUP_FLAG_ESCORTQUESTNPC))
+                me->SaveRespawnTime(me->GetRespawnDelay());
         }
     }
 
@@ -375,17 +369,6 @@ void EscortAI::SetEscortPaused(bool on)
         RemoveEscortState(STATE_ESCORT_PAUSED);
         _resume = true;
     }
-}
-
-bool EscortAI::IsEscortNPC(bool onlyIfActive) const
-{
-    if (!onlyIfActive)
-        return true;
-
-    if (GetEventStarterGUID())
-        return true;
-
-    return false;
 }
 
 Player* EscortAI::GetPlayerForEscort()

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,7 +28,7 @@
 
 TempSummon::TempSummon(SummonPropertiesEntry const* properties, WorldObject* owner, bool isWorldObject) :
 Creature(isWorldObject), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN),
-m_timer(0), m_lifetime(0)
+m_timer(0), m_lifetime(0), m_canFollowOwner(true)
 {
     if (owner)
         m_summonerGUID = owner->GetGUID();
@@ -189,7 +188,7 @@ void TempSummon::InitStats(uint32 duration)
     if (owner && IsTrigger() && m_spells[0])
     {
         SetFaction(owner->GetFaction());
-        SetLevel(owner->getLevel());
+        SetLevel(owner->GetLevel());
         if (owner->GetTypeId() == TYPEID_PLAYER)
             m_ControlledByPlayer = true;
     }
@@ -346,7 +345,7 @@ void Minion::setDeathState(DeathState s)
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER || owner->GetMinionGUID() != GetGUID())
         return;
-                
+
     for (Unit* controlled : owner->m_Controlled)
     {
         if (controlled->GetEntry() == GetEntry() && controlled->IsAlive())
@@ -389,7 +388,7 @@ void Guardian::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);
 
-    InitStatsForLevel(GetOwner()->getLevel());
+    InitStatsForLevel(GetOwner()->GetLevel());
 
     if (GetOwner()->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
         m_charmInfo->InitCharmCreateSpells();
@@ -426,7 +425,7 @@ Puppet::Puppet(SummonPropertiesEntry const* properties, Unit* owner)
 void Puppet::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);
-    SetLevel(GetOwner()->getLevel());
+    SetLevel(GetOwner()->GetLevel());
     SetReactState(REACT_PASSIVE);
 }
 
@@ -449,13 +448,4 @@ void Puppet::Update(uint32 time)
             /// @todo why long distance .die does not remove it
         }
     }
-}
-
-void Puppet::RemoveFromWorld()
-{
-    if (!IsInWorld())
-        return;
-
-    RemoveCharmedBy(nullptr);
-    Minion::RemoveFromWorld();
 }

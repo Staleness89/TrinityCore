@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,23 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Borean_Tundra
-SD%Complete: 100
-SDCategory: Borean Tundra
-EndScriptData */
-
-/* ContentData
-npc_iruk
-npc_corastrasza
-npc_sinkhole_kill_credit
-npc_khunok_the_behemoth
-npc_nerubar_victim
-npc_nesingwary_trapper
-npc_lurgglbr
-EndContentData */
-
 #include "ScriptMgr.h"
+#include "CreatureAIImpl.h"
 #include "GameObject.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
@@ -47,136 +31,6 @@ EndContentData */
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include "WorldSession.h"
-
-/*######
-## npc_sinkhole_kill_credit
-######*/
-
-enum Sinkhole
-{
-    GO_EXPLOSIVES_CART            = 188160,
-    NPC_SCOURGED_BURROWER         = 26250,
-    QUEST_PLUG_THE_SINKHOLES      = 11897,
-    SPELL_SET_CART                = 46797,
-    SPELL_EXPLODE_CART            = 46799,
-    SPELL_SUMMON_CART             = 46798,
-    SPELL_SUMMON_WORM             = 46800
-};
-
-class npc_sinkhole_kill_credit : public CreatureScript
-{
-public:
-    npc_sinkhole_kill_credit() : CreatureScript("npc_sinkhole_kill_credit") { }
-
-    struct npc_sinkhole_kill_creditAI : public ScriptedAI
-    {
-        npc_sinkhole_kill_creditAI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            phaseTimer = 500;
-            phase = 0;
-            casterGuid.Clear();
-        }
-
-        uint32 phaseTimer;
-        uint8  phase;
-        ObjectGuid casterGuid;
-
-        void Reset() override
-        {
-            Initialize();
-        }
-
-        void SpellHit(Unit* caster, SpellInfo const* spell) override
-        {
-            if (phase || spell->Id != SPELL_SET_CART)
-                return;
-
-            Player* player = caster->ToPlayer();
-            if (player && player->GetQuestStatus(QUEST_PLUG_THE_SINKHOLES) == QUEST_STATUS_INCOMPLETE)
-            {
-                phase = 1;
-                casterGuid = caster->GetGUID();
-            }
-        }
-
-        void JustEngagedWith(Unit* /*who*/) override { }
-
-        void UpdateAI(uint32 diff) override
-        {
-            if (!phase)
-                return;
-
-            if (phaseTimer <= diff)
-            {
-                switch (phase)
-                {
-                    case 1:
-                        DoCast(me, SPELL_EXPLODE_CART, true);
-                        DoCast(me, SPELL_SUMMON_CART, true);
-                        if (GameObject* cart = me->FindNearestGameObject(GO_EXPLOSIVES_CART, 3.0f))
-                            cart->SetFaction(FACTION_MONSTER);
-                        phaseTimer = 3000;
-                        phase = 2;
-                        break;
-                    case 2:
-                        if (GameObject* cart = me->FindNearestGameObject(GO_EXPLOSIVES_CART, 3.0f))
-                            cart->UseDoorOrButton();
-                        DoCast(me, SPELL_EXPLODE_CART, true);
-                        phaseTimer = 3000;
-                        phase = 3;
-                        break;
-                    case 3:
-                        DoCast(me, SPELL_EXPLODE_CART, true);
-                        phaseTimer = 2000;
-                        phase = 5; // @fixme: phase 4 is missing...
-                        break;
-                    case 5:
-                        DoCast(me, SPELL_SUMMON_WORM, true);
-                        if (Unit* worm = me->FindNearestCreature(NPC_SCOURGED_BURROWER, 3.0f))
-                        {
-                            worm->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            worm->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        }
-                        phaseTimer = 1000;
-                        phase = 6;
-                        break;
-                    case 6:
-                        DoCast(me, SPELL_EXPLODE_CART, true);
-                        if (Unit* worm = me->FindNearestCreature(NPC_SCOURGED_BURROWER, 3.0f))
-                        {
-                            Unit::Kill(me, worm);
-                            worm->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                        }
-                        phaseTimer = 2000;
-                        phase = 7;
-                        break;
-                    case 7:
-                        DoCast(me, SPELL_EXPLODE_CART, true);
-                        if (Player* caster = ObjectAccessor::GetPlayer(*me, casterGuid))
-                            caster->KilledMonster(me->GetCreatureTemplate(), me->GetGUID());
-                        phaseTimer = 5000;
-                        phase = 8;
-                        break;
-                    case 8:
-                        EnterEvadeMode();
-                        break;
-                }
-            } else phaseTimer -= diff;
-
-        }
-
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_sinkhole_kill_creditAI(creature);
-    }
-};
 
 /*######
 ## npc_khunok_the_behemoth
@@ -409,12 +263,10 @@ public:
     }
 };
 
-/*######
-## npc_nesingwary_trapper
-######*/
-
 enum NesingwaryTrapper
 {
+    NPC_NESINGWARY_TRAPPER = 25835,
+
     GO_HIGH_QUALITY_FUR = 187983,
 
     GO_CARIBOU_TRAP_1   = 187982,
@@ -445,6 +297,42 @@ const uint32 CaribouTraps[CaribouTrapsNum] =
     GO_CARIBOU_TRAP_1, GO_CARIBOU_TRAP_2, GO_CARIBOU_TRAP_3, GO_CARIBOU_TRAP_4, GO_CARIBOU_TRAP_5,
     GO_CARIBOU_TRAP_6, GO_CARIBOU_TRAP_7, GO_CARIBOU_TRAP_8, GO_CARIBOU_TRAP_9, GO_CARIBOU_TRAP_10,
     GO_CARIBOU_TRAP_11, GO_CARIBOU_TRAP_12, GO_CARIBOU_TRAP_13, GO_CARIBOU_TRAP_14, GO_CARIBOU_TRAP_15,
+};
+
+class spell_q11865_place_fake_fur : public SpellScript
+{
+    PrepareSpellScript(spell_q11865_place_fake_fur);
+
+    bool Load() override
+    {
+        return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+    }
+
+    void ActivateGameObject(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        GameObject* go = GetHitGObj();
+        Player* player = GetCaster()->ToPlayer();
+
+        if (go->FindNearestCreature(NPC_NESINGWARY_TRAPPER, 10.0f, true) || go->FindNearestCreature(NPC_NESINGWARY_TRAPPER, 10.0f, false) || go->FindNearestGameObject(GO_HIGH_QUALITY_FUR, 2.0f))
+            return;
+
+        float x, y, z;
+        go->GetClosePoint(x, y, z, go->GetCombatReach() / 3, 7.0f);
+
+        go->SummonGameObject(GO_HIGH_QUALITY_FUR, go->GetPosition(), QuaternionData(), 20);
+        if (TempSummon* summon = player->SummonCreature(NPC_NESINGWARY_TRAPPER, x, y, z, go->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 1000))
+        {
+            summon->SetVisible(false);
+            summon->SetReactState(REACT_PASSIVE);
+            summon->SetImmuneToPC(true);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_q11865_place_fake_fur::ActivateGameObject, EFFECT_0, SPELL_EFFECT_ACTIVATE_OBJECT);
+    }
 };
 
 class npc_nesingwary_trapper : public CreatureScript
@@ -734,12 +622,11 @@ public:
             Creature* owner = GetOwner()->ToCreature();
             owner->RemoveAllAurasExceptType(SPELL_AURA_DUMMY);
             owner->CombatStop(true);
-            owner->GetThreatManager().ClearAllThreat();
             owner->GetMotionMaster()->Clear();
             owner->GetMotionMaster()->MoveFollow(GetCaster(), 4.0f, 0.0f);
             owner->CastSpell(owner, SPELL_SUBDUED, true);
             GetCaster()->CastSpell(GetCaster(), SPELL_DRAKE_HATCHLING_SUBDUED, true);
-            owner->SetFaction(35);
+            owner->SetFaction(FACTION_FRIENDLY);
             owner->SetImmuneToAll(true);
             owner->DespawnOrUnsummon(3 * MINUTE*IN_MILLISECONDS);
         }
@@ -920,7 +807,7 @@ public:
                         if (talbot)
                         {
                             talbot->UpdateEntry(NPC_PRINCE_VALANAR);
-                            talbot->SetFaction(14);
+                            talbot->SetFaction(FACTION_MONSTER);
                             talbot->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             talbot->SetReactState(REACT_PASSIVE);
                         }
@@ -1528,17 +1415,14 @@ public:
 ######*/
 enum ImprisionedBerylSorcerer
 {
-    SPELL_NEURAL_NEEDLE             = 45634,
+    SPELL_NEURAL_NEEDLE                  = 45634,
+    SPELL_PROTOTYPE_NEURAL_NEEDLE        = 48252,
+    SPELL_NEURAL_NEEDLE_IMPACT           = 45702,
+    SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT = 48254,
 
-    NPC_IMPRISONED_BERYL_SORCERER   = 25478,
+    NPC_IMPRISONED_BERYL_SORCERER = 25478,
 
-    SAY_IMPRISIONED_BERYL_1         = 0,
-    SAY_IMPRISIONED_BERYL_2         = 1,
-    SAY_IMPRISIONED_BERYL_3         = 2,
-    SAY_IMPRISIONED_BERYL_4         = 3,
-    SAY_IMPRISIONED_BERYL_5         = 4,
-    SAY_IMPRISIONED_BERYL_6         = 5,
-    SAY_IMPRISIONED_BERYL_7         = 6
+    QUEST_THE_ART_OF_PERSUASION   = 11648
 };
 
 class npc_imprisoned_beryl_sorcerer : public CreatureScript
@@ -1575,9 +1459,7 @@ public:
             if (rebuff <= diff)
             {
                 if (!me->HasAura(SPELL_COSMETIC_ENSLAVE_CHAINS_SELF))
-                {
                     DoCast(me, SPELL_COSMETIC_ENSLAVE_CHAINS_SELF);
-                }
                 rebuff = 180000;
             }
             else
@@ -1592,42 +1474,29 @@ public:
 
         void SpellHit(Unit* unit, SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_NEURAL_NEEDLE && unit->GetTypeId() == TYPEID_PLAYER)
-                if (Player* player = unit->ToPlayer())
-                    GotStinged(player->GetGUID());
+            if ((spell->Id == SPELL_NEURAL_NEEDLE || spell->Id == SPELL_PROTOTYPE_NEURAL_NEEDLE) && unit->GetTypeId() == TYPEID_PLAYER)
+                GotStinged(unit->ToPlayer(), spell->Id);
         }
 
-        void GotStinged(ObjectGuid casterGUID)
+        void GotStinged(Player* caster, uint32 spellId)
         {
-            if (Player* caster = ObjectAccessor::GetPlayer(*me, casterGUID))
-            {
-                uint32 step = caster->GetAuraCount(SPELL_NEURAL_NEEDLE) + 1;
-                switch (step)
-                {
-                    case 1:
-                        Talk(SAY_IMPRISIONED_BERYL_1);
-                        break;
-                    case 2:
-                        Talk(SAY_IMPRISIONED_BERYL_2, caster);
-                        break;
-                    case 3:
-                        Talk(SAY_IMPRISIONED_BERYL_3);
-                        break;
-                    case 4:
-                        Talk(SAY_IMPRISIONED_BERYL_4);
-                        break;
-                    case 5:
-                        Talk(SAY_IMPRISIONED_BERYL_5);
-                        caster->KilledMonsterCredit(NPC_IMPRISONED_BERYL_SORCERER);
-                        break;
-                    case 6:
-                        Talk(SAY_IMPRISIONED_BERYL_6, caster);
-                        break;
-                    case 7:
-                        Talk(SAY_IMPRISIONED_BERYL_7);
-                        break;
-                }
-            }
+            DoCastSelf(spellId == SPELL_NEURAL_NEEDLE ? SPELL_NEURAL_NEEDLE_IMPACT : SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT);
+
+            // Event cannot happen if quest is not accepted/completed/rewarded
+            if (caster->GetQuestStatus(QUEST_THE_ART_OF_PERSUASION) == QUEST_STATUS_NONE)
+                return;
+
+            uint32 step = 0;
+
+            if (spellId == SPELL_NEURAL_NEEDLE)
+                step = caster->GetAuraCount(SPELL_NEURAL_NEEDLE); // Text IDs 0-6
+            else
+                step = caster->GetAuraCount(SPELL_PROTOTYPE_NEURAL_NEEDLE) + 7; // Text IDs 7-18
+
+            if (spellId == SPELL_NEURAL_NEEDLE && step == 4)
+                caster->KilledMonsterCredit(NPC_IMPRISONED_BERYL_SORCERER);
+
+            Talk(step, caster);
         }
     };
 
@@ -2044,119 +1913,6 @@ public:
     }
 };
 
-/*******************************************************
- * npc_warmage_coldarra
- *******************************************************/
-
-enum Spells
-{
-    SPELL_TRANSITUS_SHIELD_BEAM = 48310
-};
-
-enum NPCs
-{
-    NPC_TRANSITUS_SHIELD_DUMMY   = 27306,
-    NPC_WARMAGE_HOLLISTER        = 27906,
-    NPC_WARMAGE_CALANDRA         = 27173,
-    NPC_WARMAGE_WATKINS          = 27904
-};
-
-class npc_warmage_coldarra : public CreatureScript
-{
-public:
-    npc_warmage_coldarra() : CreatureScript("npc_warmage_coldarra") { }
-
-    struct npc_warmage_coldarraAI : public ScriptedAI
-    {
-        npc_warmage_coldarraAI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            m_uiTimer = 0;
-        }
-
-        uint32 m_uiTimer;                 //Timer until recast
-
-        void Reset() override
-        {
-            Initialize();
-        }
-
-        void JustEngagedWith(Unit* /*who*/) override { }
-
-        void AttackStart(Unit* /*who*/) override { }
-
-        void UpdateAI(uint32 uiDiff) override
-        {
-            if (m_uiTimer <= uiDiff)
-            {
-                std::list<Creature*> orbList;
-                GetCreatureListWithEntryInGrid(orbList, me, NPC_TRANSITUS_SHIELD_DUMMY, 32.0f);
-
-                switch (me->GetEntry())
-                {
-                    case NPC_WARMAGE_HOLLISTER:
-                    {
-                        if (!orbList.empty())
-                        {
-                            for (std::list<Creature*>::const_iterator itr = orbList.begin(); itr != orbList.end(); ++itr)
-                            {
-                                if (Creature* pOrb = *itr)
-                                    if (pOrb->GetPositionY() > 6680)
-                                        DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
-                            }
-                        }
-                        m_uiTimer = urand(90000, 120000);
-                    }
-                        break;
-                    case NPC_WARMAGE_CALANDRA:
-                    {
-                        if (!orbList.empty())
-                        {
-                            for (std::list<Creature*>::const_iterator itr = orbList.begin(); itr != orbList.end(); ++itr)
-                            {
-                                if (Creature* pOrb = *itr)
-                                    if ((pOrb->GetPositionY() < 6680) && (pOrb->GetPositionY() > 6630))
-                                        DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
-                            }
-                        }
-                        m_uiTimer = urand(90000, 120000);
-                    }
-                        break;
-                    case NPC_WARMAGE_WATKINS:
-                    {
-                        if (!orbList.empty())
-                        {
-                            for (std::list<Creature*>::const_iterator itr = orbList.begin(); itr != orbList.end(); ++itr)
-                            {
-                                if (Creature* pOrb = *itr)
-                                    if (pOrb->GetPositionY() < 6630)
-                                        DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
-                            }
-                        }
-                        m_uiTimer = urand(90000, 120000);
-                    }
-                        break;
-                }
-            }
-            else m_uiTimer -= uiDiff;
-
-            ScriptedAI::UpdateAI(uiDiff);
-
-            if (!UpdateVictim())
-                return;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_warmage_coldarraAI(creature);
-    }
-};
-
 /*######
 ## npc_hidden_cultist
 ######*/
@@ -2244,7 +2000,7 @@ public:
 
         void AttackPlayer()
         {
-            me->SetFaction(14);
+            me->SetFaction(FACTION_MONSTER);
             if (Player* player = ObjectAccessor::GetPlayer(*me, uiPlayerGUID))
                 AttackStart(player);
         }
@@ -2503,13 +2259,93 @@ public:
     }
 };
 
+enum OrabusTheHelmsman
+{
+    NPC_ORABUS            = 32576,
+    NPC_KVALDIR_CREWMAN_1 = 32577,
+    NPC_KVALDIR_CREWMAN_2 = 32578,
+    NPC_KVALDIR_CREWMAN_3 = 32579,
+    NPC_KVALDIR_CREWMAN_4 = 32580
+};
+
+class npc_orabus_the_helmsman_ship_exit_pos : public UnitScript
+{
+public:
+    npc_orabus_the_helmsman_ship_exit_pos() : UnitScript("npc_orabus_the_helmsman_ship_exit_pos") { }
+
+    void ModifyVehiclePassengerExitPos(Unit* passenger, Vehicle* /*vehicle*/, Position& pos)
+    {
+        if (passenger->GetTypeId() == TYPEID_UNIT)
+        {
+            switch (passenger->GetEntry())
+            {
+                case NPC_ORABUS:
+                    pos.Relocate(2807.858f, 7038.571f, 7.075813f, 4.73481f);
+                    break;
+                case NPC_KVALDIR_CREWMAN_1:
+                    pos.Relocate(2801.168f, 7046.468f, 5.362013f, 4.73481f);
+                    break;
+                case NPC_KVALDIR_CREWMAN_2:
+                    pos.Relocate(2803.729f, 7046.516f, 5.362013f, 4.73481f);
+                    break;
+                case NPC_KVALDIR_CREWMAN_3:
+                    pos.Relocate(2801.48f, 7051.379f, 5.362913f, 4.73481f);
+                    break;
+                case NPC_KVALDIR_CREWMAN_4:
+                    pos.Relocate(2803.319f, 7051.411f, 5.362913f, 4.73481f);
+                    break;
+            }
+        }
+    }
+};
+
+// 45668 - Ultra-Advanced Proto-Typical Shortening Blaster
+enum ShorteningBlaster
+{
+    SPELL_SHORTENING_BLASTER_BIGGER1    = 45674,
+    SPELL_SHORTENING_BLASTER_SHRUNK1    = 45675,
+    SPELL_SHORTENING_BLASTER_YELLOW1    = 45678,
+    SPELL_SHORTENING_BLASTER_GHOST1     = 45682,
+    SPELL_SHORTENING_BLASTER_POLYMORPH1 = 45684,
+
+    SPELL_SHORTENING_BLASTER_BIGGER2    = 45673,
+    SPELL_SHORTENING_BLASTER_SHRUNK2    = 45672,
+    SPELL_SHORTENING_BLASTER_YELLOW2    = 45677,
+    SPELL_SHORTENING_BLASTER_GHOST2     = 45682,
+    SPELL_SHORTENING_BLASTER_POLYMORPH2 = 45683
+};
+
+class spell_q11653_shortening_blaster : public SpellScript
+{
+    PrepareSpellScript(spell_q11653_shortening_blaster);
+
+    void HandleScript(SpellEffIndex /* effIndex */)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+
+        uint32 spellId = RAND(SPELL_SHORTENING_BLASTER_BIGGER1, SPELL_SHORTENING_BLASTER_SHRUNK1, SPELL_SHORTENING_BLASTER_YELLOW1,
+            SPELL_SHORTENING_BLASTER_GHOST1, SPELL_SHORTENING_BLASTER_POLYMORPH1);
+        uint32 spellId2 = RAND(SPELL_SHORTENING_BLASTER_BIGGER2, SPELL_SHORTENING_BLASTER_SHRUNK2, SPELL_SHORTENING_BLASTER_YELLOW2,
+            SPELL_SHORTENING_BLASTER_GHOST2, SPELL_SHORTENING_BLASTER_POLYMORPH2);
+
+        caster->CastSpell(caster, spellId, true);
+        target->CastSpell(target, spellId2, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_q11653_shortening_blaster::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_borean_tundra()
 {
-    new npc_sinkhole_kill_credit();
     new npc_khunok_the_behemoth();
     new npc_corastrasza();
     new npc_iruk();
     new npc_nerubar_victim();
+    RegisterSpellScript(spell_q11865_place_fake_fur);
     new npc_nesingwary_trapper();
     new npc_lurgglbr();
     new spell_red_dragonblood();
@@ -2524,9 +2360,10 @@ void AddSC_borean_tundra()
     new npc_bonker_togglevolt();
     new npc_trapped_mammoth_calf();
     new npc_valiance_keep_cannoneer();
-    new npc_warmage_coldarra();
     new npc_hidden_cultist();
     new spell_windsoul_totem_aura();
     new spell_q11719_bloodspore_ruination_45997();
     new npc_bloodmage_laurith();
+    new npc_orabus_the_helmsman_ship_exit_pos();
+    RegisterSpellScript(spell_q11653_shortening_blaster);
 }

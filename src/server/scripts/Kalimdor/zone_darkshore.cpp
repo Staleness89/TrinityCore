@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,14 +18,13 @@
 /* ScriptData
 SDName: Darkshore
 SD%Complete: 100
-SDComment: Quest support: 731, 2078, 5321
+SDComment: Quest support: 731, 5321
 SDCategory: Darkshore
 EndScriptData */
 
 /* ContentData
 npc_kerlonian
 npc_prospector_remtravel
-npc_threshwackonator
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -53,8 +51,7 @@ enum Kerlonian
     SPELL_SLEEP_VISUAL          = 25148,
     SPELL_AWAKEN                = 17536,
     QUEST_SLEEPER_AWAKENED      = 5321,
-    NPC_LILADRIS                = 11219,                    //attackers entries unknown
-    FACTION_KER_ESCORTEE        = 113
+    NPC_LILADRIS                = 11219                    //attackers entries unknown
 };
 
 /// @todo make concept similar as "ringo" -escort. Find a way to run the scripted attacks, _if_ player are choosing road.
@@ -162,7 +159,7 @@ public:
             {
                 me->SetStandState(UNIT_STAND_STATE_STAND);
                 Talk(SAY_KER_START, player);
-                StartFollow(player, FACTION_KER_ESCORTEE, quest);
+                StartFollow(player, FACTION_ESCORTEE_N_NEUTRAL_PASSIVE, QUEST_SLEEPER_AWAKENED);
             }
         }
     };
@@ -305,6 +302,7 @@ public:
     }
 };
 
+<<<<<<< HEAD
 /*####
 # npc_threshwackonator
 ####*/
@@ -386,9 +384,10 @@ public:
     }
 };
 
+=======
+>>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 void AddSC_darkshore()
 {
     new npc_kerlonian();
     new npc_prospector_remtravel();
-    new npc_threshwackonator();
 }
