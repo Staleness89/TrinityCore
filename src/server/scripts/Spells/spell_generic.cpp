@@ -4421,12 +4421,6 @@ class spell_gen_charmed_unit_spell_cooldown : public SpellScript
             owner->SendDirectMessage(&data);
         }
     }
-
-    void Register() override
-    {
-        OnCast += SpellCastFn(spell_gen_charmed_unit_spell_cooldown::HandleCast);
-    }
-};
     
 class spell_gen_skill_update : public SpellScript
 {
@@ -4477,9 +4471,6 @@ class spell_gen_deathcharger_reins : public SpellScript
             break;
         default:
             return;
-        }
-    }
-
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_gen_deathcharger_reins::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
@@ -4502,6 +4493,7 @@ class spell_gen_raid_ui_fx : public SpellScript
     void Register() override
     {
         OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
+        OnCast += SpellCastFn(spell_gen_charmed_unit_spell_cooldown::HandleCast);
     }
 };
 
@@ -4673,12 +4665,8 @@ void AddSC_generic_spell_scripts()
     RegisterAuraScript(spell_stasis_field_aura);
     RegisterAuraScript(spell_gen_vehicle_control_link);
     RegisterSpellScript(spell_freezing_circle);
-    RegisterSpellScript(spell_gen_charmed_unit_spell_cooldown);
-<<<<<<< HEAD
     RegisterSpellScript(spell_gen_skill_update);
     RegisterSpellScript(spell_gen_deathcharger_reins);
     RegisterSpellScript(spell_gen_raid_ui_fx);
-=======
-    RegisterSpellScript(spell_gen_cannon_blast);
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
+    RegisterSpellScript(spell_gen_charmed_unit_spell_cooldown);
 }
