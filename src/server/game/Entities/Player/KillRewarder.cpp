@@ -190,10 +190,9 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (_victim->GetTypeId() == TYPEID_PLAYER)
             player->KilledPlayerCredit();
     }
-<<<<<<< HEAD
 
 	float const rate = _group ?
-		_groupRate * float(player->getLevel()) / _sumLevel : // Group rate depends on summary level.
+		_groupRate * float(player->GetLevel()) / _sumLevel : // Group rate depends on summary level.
 		1.0f;                                                // Personal rate is 100%.
 	if (_xp)
 		// 4.2. Give XP.
@@ -206,7 +205,6 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
     // Give kill credit only in PvE.
     if (!_isPvP)
 		_RewardKillCredit(player);
-=======
     // Give XP only in PvE or in battlegrounds.
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
@@ -224,7 +222,6 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             _RewardKillCredit(player);
         }
     }
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 }
 
 void KillRewarder::_RewardGroup()

@@ -3052,7 +3052,6 @@ public:
     }
 };
 
-<<<<<<< HEAD
 // Called by Death Coil (damage) - 47632, Frost Strike - 49143 and Runic Strike - 56815
 // Runic Empowerment - 81229
 class spell_dk_runic_empowerment : public SpellScriptLoader
@@ -3079,7 +3078,7 @@ public:
 							std::set<uint8>::iterator itr = runes.begin();
 							std::advance(itr, urand(0, runes.size() - 1));
 							player->SetRuneCooldown((*itr), 0);
-							player->ResyncRunes(MAX_RUNES);
+							player->ResyncRunes();
 					}
 				}
 			}
@@ -3139,7 +3138,6 @@ return new spell_dk_runic_corruption_SpellScript();
 };
 
 */
-=======
 #define DKBloodTapScriptName "spell_dk_blood_tap"
 
 // 45529 - Blood Tap
@@ -3259,7 +3257,6 @@ public:
         return new spell_dk_blood_tap_SpellScript();
     }
 };
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 
 void AddSC_deathknight_spell_scripts()
 {
@@ -3316,9 +3313,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_raise_ally_initial();
     new spell_dk_raise_ally();
     new spell_dk_ghoul_thrash();
-<<<<<<< HEAD
 	new spell_dk_runic_empowerment();
-=======
     new spell_dk_blood_tap();
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 }

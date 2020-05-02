@@ -23,12 +23,12 @@ public:
 
 	void OnLogin(Player* player, bool firstLogin)
 	{
-		if (player->getRace() != RACE_FEL_ORC)
+		if (player->GetRace() != RACE_FEL_ORC)
 			return;
 
 		if (player->GetQuestStatus(GILNEAN_TRANSFORM_QUEST) != (QUEST_STATUS_COMPLETE))
 		{
-			if (player->getGender() == GENDER_MALE)
+			if (player->GetGender() == GENDER_MALE)
 			{
 				player->SetDisplayId(GILNEAN_TRANSFORM_MALE);
 				return;

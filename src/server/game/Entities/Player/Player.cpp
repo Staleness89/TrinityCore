@@ -5867,16 +5867,13 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
         return;
 
     float chance = float(3 * lvldif * skilldif) / plevel;
-<<<<<<< HEAD
 	if (!defense)
 		chance += chance * 0.02f * GetStat(STAT_INTELLECT);
 	else if (defense)
 		chance += chance * 0.02f * GetStat(STAT_SPIRIT);
-=======
     if (!defense)
         if (GetClass() == CLASS_WARRIOR || GetClass() == CLASS_ROGUE)
             chance += chance * 0.02f * GetStat(STAT_INTELLECT);
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 
     chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%
 
@@ -11716,86 +11713,6 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
     return EQUIP_ERR_OK;
 }
 
-<<<<<<< HEAD
-=======
-InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
-{
-    if (!GetGroup() || !GetGroup()->isLFGGroup())
-        return EQUIP_ERR_OK;    // not in LFG group
-
-    // check if looted object is inside the lfg dungeon
-    Map const* map = lootedObject->GetMap();
-    if (!sLFGMgr->inLfgDungeonMap(GetGroup()->GetGUID(), map->GetId(), map->GetDifficulty()))
-        return EQUIP_ERR_OK;
-
-    if (!proto)
-        return EQUIP_ERR_ITEM_NOT_FOUND;
-   // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
-
-    const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
-    {
-        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
-        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
-        SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,   0,
-        SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
-        SKILL_FISHING
-    }; //Copy from function Item::GetSkill()
-
-    if ((proto->AllowableClass & GetClassMask()) == 0 || (proto->AllowableRace & GetRaceMask()) == 0)
-        return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
-
-    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
-        return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-
-    if (proto->RequiredSkill != 0)
-    {
-        if (!GetSkillValue(proto->RequiredSkill))
-            return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-        else if (GetSkillValue(proto->RequiredSkill) < proto->RequiredSkillRank)
-            return EQUIP_ERR_CANT_EQUIP_SKILL;
-    }
-
-    uint8 _class = GetClass();
-
-    if (proto->Class == ITEM_CLASS_WEAPON && GetSkillValue(item_weapon_skills[proto->SubClass]) == 0)
-        return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-
-    if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass > ITEM_SUBCLASS_ARMOR_MISC && proto->SubClass < ITEM_SUBCLASS_ARMOR_BUCKLER && proto->InventoryType != INVTYPE_CLOAK)
-    {
-        if (_class == CLASS_WARRIOR || _class == CLASS_PALADIN || _class == CLASS_DEATH_KNIGHT)
-        {
-            if (GetLevel() < 40)
-            {
-                if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
-                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-            }
-            else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_PLATE)
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-        }
-        else if (_class == CLASS_HUNTER || _class == CLASS_SHAMAN)
-        {
-            if (GetLevel() < 40)
-            {
-                if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
-                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-            }
-            else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-        }
-
-        if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
-            if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-
-        if (_class == CLASS_MAGE || _class == CLASS_PRIEST || _class == CLASS_WARLOCK)
-            if (proto->SubClass != ITEM_SUBCLASS_ARMOR_CLOTH)
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-    }
-
-    return EQUIP_ERR_OK;
-}
-
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 InventoryResult Player::CanUseAmmo(uint32 item) const
 {
     TC_LOG_DEBUG("entities.player.items", "STORAGE: CanUseAmmo item = %u", item);
@@ -24754,11 +24671,7 @@ uint32 Player::CalculateTalentsPoints() const
     if (GetClass() != CLASS_DEATH_KNIGHT || GetMapId() != 609)
         return uint32(base_talent * sWorld->getRate(RATE_TALENT));
 
-<<<<<<< HEAD
-    uint32 talentPointsForLevel = getLevel() < 59 ? 0 : getLevel() - 58;
-=======
-    uint32 talentPointsForLevel = GetLevel() < 56 ? 0 : GetLevel() - 55;
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
+    uint32 talentPointsForLevel = GetLevel() < 59 ? 0 : GetLevel() - 58;
     talentPointsForLevel += m_questRewardTalentCount;
 
     if (talentPointsForLevel > base_talent)

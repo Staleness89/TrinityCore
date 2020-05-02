@@ -4421,6 +4421,12 @@ class spell_gen_charmed_unit_spell_cooldown : public SpellScript
             owner->SendDirectMessage(&data);
         }
     }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_gen_charmed_unit_spell_cooldown::HandleCast);
+    }
+};
     
 class spell_gen_skill_update : public SpellScript
 {
@@ -4471,6 +4477,9 @@ class spell_gen_deathcharger_reins : public SpellScript
             break;
         default:
             return;
+        }
+    }
+
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_gen_deathcharger_reins::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
@@ -4493,7 +4502,6 @@ class spell_gen_raid_ui_fx : public SpellScript
     void Register() override
     {
         OnCheckCast += SpellCheckCastFn(spell_gen_raid_ui_fx::CheckRequirement);
-        OnCast += SpellCastFn(spell_gen_charmed_unit_spell_cooldown::HandleCast);
     }
 };
 

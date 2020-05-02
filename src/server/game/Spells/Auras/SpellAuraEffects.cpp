@@ -1967,10 +1967,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                                 break;
 							// Goblin
 							case RACE_GOBLIN:
-								target->SetDisplayId(target->getGender() == GENDER_FEMALE ? 38216 : 33486);
+								target->SetDisplayId(target->GetGender() == GENDER_FEMALE ? 38216 : 33486);
 								// Worgen
 							case RACE_FEL_ORC:
-								target->SetDisplayId(target->getGender() == GENDER_FEMALE ? 35997 : 37455);
+								target->SetDisplayId(target->GetGender() == GENDER_FEMALE ? 35997 : 37455);
 								break;
                             default:
                                 break;
@@ -2032,11 +2032,11 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                                 target->SetDisplayId(gender == GENDER_MALE ? 25038 : 25049);
                                 break;
 							case RACE_GOBLIN:
-								target->SetDisplayId(target->getGender() == GENDER_MALE ? 25036 : 25047);
+								target->SetDisplayId(target->GetGender() == GENDER_MALE ? 25036 : 25047);
 								break;
 								// Worgen
 							case RACE_FEL_ORC:
-								target->SetDisplayId(target->getGender() == GENDER_MALE ? 37543 : 37542);
+								target->SetDisplayId(target->GetGender() == GENDER_MALE ? 37543 : 37542);
 								break;
                             default:
                                 break;
@@ -2062,7 +2062,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                         break;
 					// Gilnean Transform
 					case 150143:
-						target->SetDisplayId(target->getGender() == GENDER_MALE ? 37101 : 37105);
+						target->SetDisplayId(target->GetGender() == GENDER_MALE ? 37101 : 37105);
                     default:
                         break;
                 }

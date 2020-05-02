@@ -445,10 +445,7 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recvData)
     /** error handling **/
     if (!group->IsLeader(GetPlayer()->GetGUID()))
         return;
-
-    if (group->isLFGGroup())
-        return;
-
+    
     if (lootMethod > NEED_BEFORE_GREED)
         return;
 

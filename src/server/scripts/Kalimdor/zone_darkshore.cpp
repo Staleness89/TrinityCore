@@ -302,7 +302,6 @@ public:
     }
 };
 
-<<<<<<< HEAD
 /*####
 # npc_threshwackonator
 ####*/
@@ -384,8 +383,6 @@ public:
     }
 };
 
-=======
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
 void AddSC_darkshore()
 {
     new npc_kerlonian();

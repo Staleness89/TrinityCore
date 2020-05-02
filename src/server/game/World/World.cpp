@@ -2430,17 +2430,9 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_DELETECHARS].Reset();
         Player::DeleteOldCharacters();
     }
-<<<<<<< HEAD
-	
-=======
-
     sGroupMgr->Update(diff);
     sWorldUpdateTime.RecordUpdateTimeDuration("UpdateGroupMgr");
 
-    sLFGMgr->Update(diff);
-    sWorldUpdateTime.RecordUpdateTimeDuration("UpdateLFGMgr");
-
->>>>>>> d4680bb2b250fb4dee8bb883a7a5e72b3ace89c4
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();
     sWorldUpdateTime.RecordUpdateTimeDuration("ProcessQueryCallbacks");
