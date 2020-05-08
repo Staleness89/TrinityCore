@@ -159,7 +159,6 @@ class TC_GAME_API Channel
 
         uint32 GetChannelId() const { return _channelId; }
         bool IsConstant() const { return _channelId != 0; }
-        bool IsLFG() const { return (GetFlags() & CHANNEL_FLAG_LFG) != 0; }
 
         bool IsAnnounce() const { return _announceEnabled; }
         void SetAnnounce(bool announce) { _announceEnabled = announce; }
@@ -223,7 +222,7 @@ class TC_GAME_API Channel
 
         bool IsOn(ObjectGuid who) const { return _playersStore.find(who) != _playersStore.end(); }
         bool IsBanned(ObjectGuid guid) const { return _bannedStore.find(guid) != _bannedStore.end(); }
-        
+
 
         uint8 GetPlayerFlags(ObjectGuid guid) const
         {

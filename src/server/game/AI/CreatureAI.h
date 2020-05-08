@@ -145,6 +145,12 @@ class TC_GAME_API CreatureAI : public UnitAI
         virtual void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spellInfo*/) { }
         virtual void SpellHitTargetGameObject(GameObject* /*target*/, SpellInfo const* /*spellInfo*/) { }
 
+        // Called when a spell cast gets interrupted
+        virtual void OnSpellCastInterrupt(SpellInfo const* /*spell*/) { }
+
+        // Called when a spell cast has been successfully finished
+        virtual void OnSuccessfulSpellCast(SpellInfo const* /*spell*/) { }
+
         // Should return true if the NPC is currently being escorted
         virtual bool IsEscorted() const { return false; }
 
@@ -192,7 +198,7 @@ class TC_GAME_API CreatureAI : public UnitAI
         /// == Gossip system ================================
 
         // Called when the dialog status between a player and the creature is requested.
-        virtual Optional<QuestGiverStatus> GetDialogStatus(Player* /*player*/) { return boost::none; }
+        virtual Optional<QuestGiverStatus> GetDialogStatus(Player* /*player*/) { return {}; }
 
         // Called when a player opens a gossip dialog with the creature.
         virtual bool GossipHello(Player* /*player*/) { return false; }

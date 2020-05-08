@@ -26,6 +26,13 @@
 #include <utility>
 #include <vector>
 
+enum class TimeFormat : uint8
+{
+    FullText,       // 1 Days 2 Hours 3 Minutes 4 Seconds
+    ShortText,      // 1d 2h 3m 4s
+    Numeric         // 1:2:3:4
+};
+
 class TC_COMMON_API Tokenizer
 {
 public:
@@ -61,7 +68,7 @@ TC_COMMON_API time_t LocalTimeToUTCTime(time_t time);
 TC_COMMON_API time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
 TC_COMMON_API tm TimeBreakdown(time_t t);
 
-TC_COMMON_API std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hoursOnly = false);
+TC_COMMON_API std::string secsToTimeString(uint64 timeInSecs, TimeFormat timeFormat = TimeFormat::FullText, bool hoursOnly = false);
 TC_COMMON_API uint32 TimeStringToSecs(std::string const& timestring);
 TC_COMMON_API std::string TimeToTimestampStr(time_t t);
 TC_COMMON_API std::string TimeToHumanReadable(time_t t);
@@ -510,6 +517,18 @@ constexpr typename std::underlying_type<E>::type AsUnderlyingType(E enumValue)
 {
     static_assert(std::is_enum<E>::value, "AsUnderlyingType can only be used with enums");
     return static_cast<typename std::underlying_type<E>::type>(enumValue);
+}
+
+template<typename Ret, typename Only>
+Ret* Coalesce(Only* arg)
+{
+    return arg;
+}
+
+template<typename Ret, typename T1, typename... T>
+Ret* Coalesce(T1* first, T*... rest)
+{
+    return static_cast<Ret*>(first ? static_cast<Ret*>(first) : Coalesce<Ret>(rest...));
 }
 
 #endif
