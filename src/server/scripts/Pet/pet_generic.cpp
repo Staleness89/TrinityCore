@@ -169,7 +169,7 @@ public:
 
         void Initialize()
         {
-            SingSongTimer = urand(1000000,2000000);
+            SingSongTimer = urand(1000000, 2000000);
         }
 
         uint32 SingSongTimer;
@@ -205,6 +205,7 @@ public:
     {
         return new npc_pet_gen_singing_sunflowerAI(creature);
     };
+};
     
 enum LichPet
 {
@@ -234,7 +235,7 @@ struct npc_pet_lich : public ScriptedAI
 void AddSC_generic_pet_scripts()
 {
     new npc_pet_gen_pandaren_monk();
-    new npc_pet_gen_mojo();
+    //new npc_pet_gen_mojo();
     new npc_pet_gen_singing_sunflower();
     RegisterCreatureAI(npc_pet_gen_soul_trader);
     RegisterCreatureAI(npc_pet_lich);
