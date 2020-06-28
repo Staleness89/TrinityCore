@@ -662,6 +662,7 @@ struct boss_headless_horseman : public ScriptedAI
 
         switch (_phase)
         {
+<<<<<<< HEAD
         case PHASE_BODY_1:
             _scheduler.Schedule(2s, uint32(TASK_GROUP_COMBAT), [this](TaskContext cleaveContext)
             {
@@ -700,6 +701,46 @@ struct boss_headless_horseman : public ScriptedAI
             break;
         default:
             break;
+=======
+            case PHASE_BODY_1:
+                _scheduler.Schedule(2s, uint32(TASK_GROUP_COMBAT), [this](TaskContext cleaveContext)
+                {
+                    DoCastVictim(SPELL_HORSEMANS_CLEAVE);
+                    cleaveContext.Repeat(2s, 6s);
+                }).Schedule(6s, uint32(TASK_GROUP_COMBAT), [this](TaskContext /*burnContext*/)
+                {
+                    if (Creature* flame = me->SummonCreature(NPC_HELPER, HeadlessHorsemanSpawnPoints[0], TEMPSUMMON_TIMED_DESPAWN, 17 * IN_MILLISECONDS))
+                        flame->AI()->SetData(DATA_INVIS_WISP_CREATURE_TYPE, INVIS_WISP_CREATURE_TYPE_FLAME);
+                });
+                break;
+            case PHASE_BODY_2:
+                _scheduler.Schedule(2s, uint32(TASK_GROUP_COMBAT), [this](TaskContext cleaveContext)
+                {
+                    DoCastVictim(SPELL_HORSEMANS_CLEAVE);
+                    cleaveContext.Repeat(2s, 6s);
+                }).Schedule(15s, uint32(TASK_GROUP_COMBAT), [this](TaskContext clonfragateContext)
+                {
+                    if (Unit* player = SelectTarget(SelectTargetMethod::Random, 0, 0.f, true, false, -SPELL_CONFLAGRATION))
+                        DoCast(player, SPELL_CONFLAGRATION, false);
+                    clonfragateContext.Repeat(10s, 16s);
+                });
+                break;
+            case PHASE_BODY_3:
+                _scheduler.Schedule(2s, uint32(TASK_GROUP_COMBAT), [this](TaskContext cleaveContext)
+                {
+                    DoCastVictim(SPELL_HORSEMANS_CLEAVE);
+                    cleaveContext.Repeat(2s, 6s);
+                }).Schedule(15s, uint32(TASK_GROUP_COMBAT), [this](TaskContext summonAddsContext)
+                {
+                    me->InterruptNonMeleeSpells(false);
+                    DoCastSelf(SPELL_HORSEMANS_SUMMON);
+                    DoTalk(SAY_SPROUTING_PUMPKINS);
+                    summonAddsContext.Repeat(25s, 35s);
+                });
+                break;
+            default:
+                break;
+>>>>>>> b304f4ad8d0683d800d9be5518911d1398609857
         }
 
     }
