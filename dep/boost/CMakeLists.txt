@@ -13,8 +13,7 @@ if(WIN32)
   if(DEFINED ENV{BOOST_ROOT})
     set(BOOST_ROOT $ENV{BOOST_ROOT})
     list(APPEND BOOST_LIBRARYDIR
-      ${BOOST_ROOT}/lib${PLATFORM}-msvc-14.2
-      ${BOOST_ROOT}/lib${PLATFORM}-msvc-14.1 )
+      ${BOOST_ROOT}/lib${PLATFORM}-msvc-14.2 )
   elseif(NOT DEFINED Boost_DIR AND NOT DEFINED BOOST_ROOT AND NOT DEFINED BOOSTROOT)
     message(FATAL_ERROR "No BOOST_ROOT environment variable could be found! Please make sure it is set and the points to your Boost installation.")
   endif()
@@ -38,7 +37,7 @@ else()
   set(BOOST_REQUIRED_VERSION 1.67)
 endif()
 
-find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED system filesystem thread program_options iostreams regex)
+find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED system filesystem program_options iostreams regex)
 
 # Find if Boost was compiled in C++03 mode because it requires -DBOOST_NO_CXX11_SCOPED_ENUMS
 

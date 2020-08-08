@@ -15,31 +15,20 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTH_HMAC_H
-#define _AUTH_HMAC_H
+#include "LFGPackets.h"
 
-#include "Define.h"
-#include <string>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
-
-class BigNumber;
-
-#define SEED_KEY_SIZE 16
-
-class TC_COMMON_API HmacHash
+void WorldPackets::LFG::LFGJoin::Read()
 {
-    public:
-        HmacHash(uint32 len, uint8* seed);
-        ~HmacHash();
-        void UpdateData(std::string const& str);
-        void UpdateData(uint8 const* data, size_t len);
-        void Finalize();
-        uint8* ComputeHash(BigNumber* bn);
-        uint8* GetDigest() { return m_digest; }
-        int GetLength() const { return SHA_DIGEST_LENGTH; }
-    private:
-        HMAC_CTX* m_ctx;
-        uint8 m_digest[SHA_DIGEST_LENGTH];
-};
-#endif
+    _worldPacket >> Roles;
+    _worldPacket >> NoPartialClear;
+    _worldPacket >> Achievements;
+    Slots.resize(_worldPacket.read<uint8>());
+    for (uint32& slot : Slots)
+        _worldPacket >> slot;
+
+    _worldPacket.read_skip<uint8>(); // Needs count, hardcoded to 3 in client
+    for (uint8& needs : Needs)
+        _worldPacket >> needs;
+
+    _worldPacket >> Comment;
+}

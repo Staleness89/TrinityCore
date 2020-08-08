@@ -15,38 +15,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _AUTH_SHA1_H
-#define _AUTH_SHA1_H
+#ifndef TRINITY_CRYPTO_CONSTANTS_H
+#define TRINITY_CRYPTO_CONSTANTS_H
 
 #include "Define.h"
-#include <string>
-#include <openssl/sha.h>
 
-class BigNumber;
-
-class TC_COMMON_API SHA1Hash
+namespace Trinity::Crypto
 {
-    public:
-        SHA1Hash();
-        ~SHA1Hash();
-
-        void UpdateBigNumbers(BigNumber* bn0, ...);
-
-        void UpdateData(const uint8 *dta, int len);
-        void UpdateData(const std::string &str);
-
-        void Initialize();
-        void Finalize();
-
-        uint8 *GetDigest(void) { return mDigest; }
-        int GetLength(void) const { return SHA_DIGEST_LENGTH; }
-
-    private:
-        SHA_CTX mC;
-        uint8 mDigest[SHA_DIGEST_LENGTH];
-};
-
-/// Returns the SHA1 hash of the given content as hex string.
-TC_COMMON_API std::string CalculateSHA1Hash(std::string const& content);
+    struct Constants
+    {
+        static constexpr size_t SHA1_DIGEST_LENGTH_BYTES = 20;
+        static constexpr size_t SHA256_DIGEST_LENGTH_BYTES = 32;
+    };
+}
 
 #endif
