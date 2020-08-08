@@ -117,12 +117,12 @@ void AddSC_feralas();
 void AddSC_moonglade();
 void AddSC_orgrimmar();
 void AddSC_silithus();
-void AddSC_stonetalon_mountains();
+// void AddSC_stonetalon_mountains();
 void AddSC_tanaris();
 void AddSC_the_barrens();
-void AddSC_thousand_needles();
+// void AddSC_thousand_needles();
 void AddSC_thunder_bluff();
-void AddSC_ungoro_crater();
+// void AddSC_ungoro_crater();
 void AddSC_winterspring();
 void AddSC_kezan();
 
@@ -231,12 +231,13 @@ void AddKalimdorScripts()
     AddSC_moonglade();
     AddSC_orgrimmar();
     AddSC_silithus();
-    AddSC_stonetalon_mountains();
+    // AddSC_stonetalon_mountains();
     AddSC_tanaris();
     AddSC_the_barrens();
-    AddSC_thousand_needles();
+    // AddSC_thousand_needles();
     AddSC_thunder_bluff();
-    AddSC_ungoro_crater();
 	AddSC_winterspring();
 	AddSC_kezan();
+    // AddSC_ungoro_crater();
+    AddSC_winterspring();
 }
