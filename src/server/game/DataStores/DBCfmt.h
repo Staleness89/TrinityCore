@@ -1,20 +1,19 @@
 /*
-* Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
-* Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef TRINITY_DBCSFRM_H
 #define TRINITY_DBCSFRM_H
@@ -40,7 +39,7 @@ char constexpr ChatChannelsEntryfmt[] = "nixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 char constexpr ChrClassesEntryfmt[] = "nxixssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixii";
 char constexpr ChrRacesEntryfmt[] = "niixiixiiixxiissssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxi";
 char constexpr CinematicCameraEntryfmt[] = "nsiffff";
-char constexpr CinematicSequencesEntryfmt[] = "nxixxxxxxx";
+char constexpr CinematicSequencesEntryfmt[] = "nxiiiiiiii";
 char constexpr CreatureDisplayInfofmt[] = "nixifxxxxxxxxxxx";
 char constexpr CreatureDisplayInfoExtrafmt[] = "diixxxxxxxxxxxxxxxxxx";
 char constexpr CreatureFamilyfmt[] = "nfifiiiiixssssssssssssssssxx";
@@ -55,8 +54,9 @@ char constexpr DurabilityQualityfmt[] = "nf";
 char constexpr EmotesEntryfmt[] = "nxxiiix";
 char constexpr EmotesTextEntryfmt[] = "nxixxxxxxxxxxxxxxxx";
 char constexpr EmotesTextSoundEntryfmt[] = "niiii";
-char constexpr FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiiffixssssssssssssssssxxxxxxxxxxxxxxxxxx";
+char constexpr FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiiffiissssssssssssssssxxxxxxxxxxxxxxxxxx";
 char constexpr FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
+char constexpr GameObjectArtKitfmt[] = "nxxxxxxx";
 char constexpr GameObjectDisplayInfofmt[] = "nsxxxxxxxxxxffffffx";
 char constexpr GemPropertiesEntryfmt[] = "nixxi";
 char constexpr GlyphPropertiesfmt[] = "niii";
@@ -83,6 +83,7 @@ char constexpr ItemLimitCategoryEntryfmt[] = "nxxxxxxxxxxxxxxxxxii";
 char constexpr ItemRandomPropertiesfmt[] = "nxiiixxssssssssssssssssx";
 char constexpr ItemRandomSuffixfmt[] = "nssssssssssssssssxxiiixxiiixx";
 char constexpr ItemSetEntryfmt[] = "dssssssssssssssssxiiiiiiiiiixxxxxxxiiiiiiiiiiiiiiiiii";
+//char constexpr LFGDungeonEntryfmt[] = "nssssssssssssssssxiiiiiiiiixxixixxxxxxxxxxxxxxxxx";
 char constexpr LightEntryfmt[] = "nifffxxxxxxxxxx";
 char constexpr LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char constexpr LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
@@ -98,7 +99,7 @@ char constexpr QuestSortEntryfmt[] = "nxxxxxxxxxxxxxxxxx";
 char constexpr QuestXPfmt[] = "niiiiiiiiii";
 char constexpr PowerDisplayfmt[] = "nixxxx";
 char constexpr PvPDifficultyfmt[] = "diiiii";
-char constexpr RandomPropertiesPointsfmt[] = "niiiiiiiiiiiiiii";
+char constexpr RandPropPointsfmt[] = "niiiiiiiiiiiiiii";
 char constexpr ScalingStatDistributionfmt[] = "niiiiiiiiiiiiiiiiiiiii";
 char constexpr ScalingStatValuesfmt[] = "iniiiiiiiiiiiiiiiiiiiiii";
 char constexpr SkillLinefmt[] = "nixssssssssssssssssxxxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxxxxi";
@@ -121,7 +122,7 @@ char constexpr SpellItemEnchantmentConditionfmt[] = "nbbbbbxxxxxbbbbbbbbbbiiiiiX
 char constexpr SpellRadiusfmt[] = "nfff";
 char constexpr SpellRangefmt[] = "nffffixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char constexpr SpellRuneCostfmt[] = "niiii";
-char constexpr SpellShapeshiftfmt[] = "nxxxxxxxxxxxxxxxxxxiixiiixxiiiiiiii";
+char constexpr SpellShapeshiftFormfmt[] = "nxxxxxxxxxxxxxxxxxxiixiiiiiiiiiiiii";
 char constexpr SpellVisualfmt[] = "dxxxxxxiixxxxxxxxxxxxxxxxxxxxxxx";
 char constexpr StableSlotPricesfmt[] = "ni";
 char constexpr SummonPropertiesfmt[] = "niiiii";

@@ -523,8 +523,14 @@ struct boss_headless_horseman : public ScriptedAI
                         std::advance(it, urand(0, uint32(me->GetMap()->GetPlayers().getSize()) - 1));
                         if (Player* player = it->GetSource())
                         {
-                            player->Say(HeadlessHorsemanInitialPlayerTexts[talkContext.GetRepeatCounter()], LANG_UNIVERSAL);
-                            player->HandleEmoteCommand(ANIM_EMOTE_SHOUT);
+                            RefManager<Map, Player> const& players = me->GetMap()->GetPlayers();
+                            LinkedListHead::Iterator<Reference<Map, Player> const> it = players.RefManager<Map, Player>::begin();
+                            std::advance(it, urand(0, uint32(me->GetMap()->GetPlayers().getSize()) - 1));
+                            if (Player* player = it->GetSource())
+                            {
+                                player->Say(HeadlessHorsemanInitialPlayerTexts[talkContext.GetRepeatCounter()], LANG_UNIVERSAL);
+                                player->HandleEmoteCommand(EMOTE_ONESHOT_SHOUT);
+                            }
                         }
                     }
 

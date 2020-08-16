@@ -6610,15 +6610,7 @@ void Player::RewardReputation(Unit* victim, float rate)
     {
         // support for: Championing - http://www.wowwiki.com/Championing
         Map const* map = GetMap();
-<<<<<<< HEAD
-        if (map->IsDungeon() || map->IsBattleground())
-            ChampioningFaction = GetChampioningFaction();
-=======
-        if (map->IsNonRaidDungeon())
-            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
-                if (dungeon->TargetLevel == 80)
                     ChampioningFaction = GetChampioningFaction();
->>>>>>> 00b16992f1ae3bf14ab5fe6366028a2b8648bfa0
     }
 
     uint32 team = GetTeam();
@@ -7065,29 +7057,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     GetMap()->SendZoneDynamicInfo(newZone, this);
 
 
-<<<<<<< HEAD
 	// Set PVP Flag if in PVP realm, BG, or WG
-	pvpInfo.IsInHostileArea = sWorld->IsPvPRealm() || InBattleground() || zone->flags & AREA_FLAG_WINTERGRASP;
-=======
-    // in PvP, any not controlled zone (except zone->FactionGroupMask == 6, default case)
-    // in PvE, only opposition team capital
-    switch (zone->FactionGroupMask)
-    {
-        case AREATEAM_ALLY:
-            pvpInfo.IsInHostileArea = GetTeam() != ALLIANCE && (sWorld->IsPvPRealm() || zone->Flags & AREA_FLAG_CAPITAL);
-            break;
-        case AREATEAM_HORDE:
-            pvpInfo.IsInHostileArea = GetTeam() != HORDE && (sWorld->IsPvPRealm() || zone->Flags & AREA_FLAG_CAPITAL);
-            break;
-        case AREATEAM_NONE:
-            // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
-            pvpInfo.IsInHostileArea = sWorld->IsPvPRealm() || InBattleground() || zone->Flags & AREA_FLAG_WINTERGRASP;
-            break;
-        default:                                            // 6 in fact
-            pvpInfo.IsInHostileArea = false;
-            break;
-    }
->>>>>>> 00b16992f1ae3bf14ab5fe6366028a2b8648bfa0
+	pvpInfo.IsInHostileArea = sWorld->IsPvPRealm() || InBattleground() || zone->Flags & AREA_FLAG_WINTERGRASP;
 
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
