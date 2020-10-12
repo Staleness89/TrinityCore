@@ -404,98 +404,98 @@ public:
         {
             switch (entry)
             {
-            case NPC_RANSHALLA:
-                // Start the altar channeling
-                DoChannelTorchSpell(true);
-                break;
-            case SAY_RANSHALLA_ALTAR_6:
-                SetEscortPaused(false);
-                break;
-            case SAY_PRIESTESS_ALTAR_8:
-                // make the gem respawn
-                if (GameObject* gem = GetClosestGameObjectWithEntry(me, GO_ELUNE_GEM, 10.0f))
-                {
-                    if (gem->isSpawned())
-                        break;
+                case NPC_RANSHALLA:
+                    // Start the altar channeling
+                    DoChannelTorchSpell(true);
+                    break;
+                case SAY_RANSHALLA_ALTAR_6:
+                    SetEscortPaused(false);
+                    break;
+                case SAY_PRIESTESS_ALTAR_8:
+                    // make the gem respawn
+                    if (GameObject* gem = GetClosestGameObjectWithEntry(me, GO_ELUNE_GEM, 10.0f, false))
+                    {
+                        if (gem->isSpawned())
+                            break;
 
-                    gem->SetRespawnTime(90);
-                    gem->Refresh();
-                }
-                break;
-            case SAY_PRIESTESS_ALTAR_9:
-                // move near the escort npc
-                if (Creature* priestess = ObjectAccessor::GetCreature(*me, _firstPriestessGUID))
-                    priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[6].m_positionX, wingThicketLocations[6].m_positionY, wingThicketLocations[6].m_positionZ);
-                break;
-            case SAY_PRIESTESS_ALTAR_13:
-                // summon the Guardian of Elune
-                if (Creature* guard = me->SummonCreature(NPC_GUARDIAN_ELUNE, wingThicketLocations[2].m_positionX, wingThicketLocations[2].m_positionY, wingThicketLocations[2].m_positionZ, wingThicketLocations[2].GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
-                {
-                    guard->GetMotionMaster()->MovePoint(0, wingThicketLocations[5].m_positionX, wingThicketLocations[5].m_positionY, wingThicketLocations[5].m_positionZ);
-                    _guardEluneGUID = guard->GetGUID();
-                }
-                // summon the Voice of Elune
-                if (GameObject* altar = ObjectAccessor::GetGameObject(*me, _altarGUID))
-                {
-                    if (Creature* voice = me->SummonCreature(NPC_VOICE_ELUNE, altar->GetPositionX(), altar->GetPositionY(), altar->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30s))
-                        _voiceEluneGUID = voice->GetGUID();
-                }
-                break;
-            case SAY_VOICE_ALTAR_15:
-                // move near the escort npc and continue dialogue
-                if (Creature* priestess = ObjectAccessor::GetCreature(*me, _secondPriestessGUID))
-                {
-                    priestess->AI()->Talk(SAY_PRIESTESS_ALTAR_14);
-                    priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[7].m_positionX, wingThicketLocations[7].m_positionY, wingThicketLocations[7].m_positionZ);
-                }
-                break;
-            case SAY_PRIESTESS_ALTAR_19:
-                // make the voice of elune leave
-                if (Creature* guard = ObjectAccessor::GetCreature(*me, _guardEluneGUID))
-                {
-                    guard->GetMotionMaster()->MovePoint(0, wingThicketLocations[2].m_positionX, wingThicketLocations[2].m_positionY, wingThicketLocations[2].m_positionZ);
-                    guard->DespawnOrUnsummon(4s);
-                }
-                break;
-            case SAY_PRIESTESS_ALTAR_20:
-                // make the first priestess leave
-                if (Creature* priestess = ObjectAccessor::GetCreature(*me, _firstPriestessGUID))
-                {
-                    priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[0].m_positionX, wingThicketLocations[0].m_positionY, wingThicketLocations[0].m_positionZ);
-                    priestess->DespawnOrUnsummon(4s);
-                }
-                break;
-            case SAY_PRIESTESS_ALTAR_21:
-                // make the second priestess leave
-                if (Creature* priestess = ObjectAccessor::GetCreature(*me, _secondPriestessGUID))
-                {
-                    priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[1].m_positionX, wingThicketLocations[1].m_positionY, wingThicketLocations[1].m_positionZ);
-                    priestess->DespawnOrUnsummon(4s);
-                }
-                break;
-            case DATA_EVENT_END:
-                // Turn towards the player
-                if (Player* player = GetPlayerForEscort())
-                {
-                    me->SetFacingToObject(player);
-                    Talk(SAY_RANSHALLA_END_1, player);
-                }
-                break;
-            case SAY_RANSHALLA_END_2:
-                // Turn towards the altar and kneel - quest complete
-                if (GameObject* altar = ObjectAccessor::GetGameObject(*me, _altarGUID))
-                {
-                    me->SetFacingToObject(altar);
-                    altar->ResetDoorOrButton();
-                }
-                me->SetStandState(UNIT_STAND_STATE_KNEEL);
-                if (Player* player = GetPlayerForEscort())
-                {
-                    player->GroupEventHappens(QUEST_GUARDIANS_ALTAR, me);
-                    Talk(SAY_RANSHALLA_END_2, player);
-                }
-                me->DespawnOrUnsummon(4s);
-                break;
+                        gem->SetRespawnTime(90);
+                        gem->Refresh();
+                    }
+                    break;
+                case SAY_PRIESTESS_ALTAR_9:
+                    // move near the escort npc
+                    if (Creature* priestess = ObjectAccessor::GetCreature(*me, _firstPriestessGUID))
+                        priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[6].m_positionX, wingThicketLocations[6].m_positionY, wingThicketLocations[6].m_positionZ);
+                    break;
+                case SAY_PRIESTESS_ALTAR_13:
+                    // summon the Guardian of Elune
+                    if (Creature* guard = me->SummonCreature(NPC_GUARDIAN_ELUNE, wingThicketLocations[2].m_positionX, wingThicketLocations[2].m_positionY, wingThicketLocations[2].m_positionZ, wingThicketLocations[2].GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+                    {
+                        guard->GetMotionMaster()->MovePoint(0, wingThicketLocations[5].m_positionX, wingThicketLocations[5].m_positionY, wingThicketLocations[5].m_positionZ);
+                        _guardEluneGUID = guard->GetGUID();
+                    }
+                    // summon the Voice of Elune
+                    if (GameObject* altar = ObjectAccessor::GetGameObject(*me, _altarGUID))
+                    {
+                        if (Creature* voice = me->SummonCreature(NPC_VOICE_ELUNE, altar->GetPositionX(), altar->GetPositionY(), altar->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30s))
+                            _voiceEluneGUID = voice->GetGUID();
+                    }
+                    break;
+                case SAY_VOICE_ALTAR_15:
+                    // move near the escort npc and continue dialogue
+                    if (Creature* priestess = ObjectAccessor::GetCreature(*me, _secondPriestessGUID))
+                    {
+                        priestess->AI()->Talk(SAY_PRIESTESS_ALTAR_14);
+                        priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[7].m_positionX, wingThicketLocations[7].m_positionY, wingThicketLocations[7].m_positionZ);
+                    }
+                    break;
+                case SAY_PRIESTESS_ALTAR_19:
+                    // make the voice of elune leave
+                    if (Creature* guard = ObjectAccessor::GetCreature(*me, _guardEluneGUID))
+                    {
+                        guard->GetMotionMaster()->MovePoint(0, wingThicketLocations[2].m_positionX, wingThicketLocations[2].m_positionY, wingThicketLocations[2].m_positionZ);
+                        guard->DespawnOrUnsummon(4s);
+                    }
+                    break;
+                case SAY_PRIESTESS_ALTAR_20:
+                    // make the first priestess leave
+                    if (Creature* priestess = ObjectAccessor::GetCreature(*me, _firstPriestessGUID))
+                    {
+                        priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[0].m_positionX, wingThicketLocations[0].m_positionY, wingThicketLocations[0].m_positionZ);
+                        priestess->DespawnOrUnsummon(4s);
+                    }
+                    break;
+                case SAY_PRIESTESS_ALTAR_21:
+                    // make the second priestess leave
+                    if (Creature* priestess = ObjectAccessor::GetCreature(*me, _secondPriestessGUID))
+                    {
+                        priestess->GetMotionMaster()->MovePoint(0, wingThicketLocations[1].m_positionX, wingThicketLocations[1].m_positionY, wingThicketLocations[1].m_positionZ);
+                        priestess->DespawnOrUnsummon(4s);
+                    }
+                    break;
+                case DATA_EVENT_END:
+                    // Turn towards the player
+                    if (Player* player = GetPlayerForEscort())
+                    {
+                        me->SetFacingToObject(player);
+                        Talk(SAY_RANSHALLA_END_1, player);
+                    }
+                    break;
+                case SAY_RANSHALLA_END_2:
+                    // Turn towards the altar and kneel - quest complete
+                    if (GameObject* altar = ObjectAccessor::GetGameObject(*me, _altarGUID))
+                    {
+                        me->SetFacingToObject(altar);
+                        altar->ResetDoorOrButton();
+                    }
+                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    if (Player* player = GetPlayerForEscort())
+                    {
+                        player->GroupEventHappens(QUEST_GUARDIANS_ALTAR, me);
+                        Talk(SAY_RANSHALLA_END_2, player);
+                    }
+                    me->DespawnOrUnsummon(4s);
+                    break;
             }
         }
 
@@ -538,7 +538,7 @@ public:
             EscortAI::UpdateEscortAI(diff);
         }
 
-        void QuestAccept(Player* player, Quest const* quest) override
+        void OnQuestAccept(Player* player, Quest const* quest) override
         {
             if (quest->GetQuestId() == QUEST_GUARDIANS_ALTAR)
             {
@@ -572,7 +572,7 @@ public:
     {
         go_elune_fireAI(GameObject* go) : GameObjectAI(go) { }
 
-        bool GossipHello(Player* /*player*/) override
+        bool OnGossipHello(Player* /*player*/) override
         {
             // Check if we are using the torches or the altar
             bool isAltar = false;

@@ -2150,49 +2150,34 @@ private:
             uint32 mount = 0;
             switch (target->GetBaseSkillValue(SKILL_RIDING))
             {
-                case 0:
-                    mount = _mount0;
-                    break;
-                case 75:
-                    mount = _mount60;
-                    break;
-                case 150:
+            case 0:
+                mount = _mount0;
+                break;
+            case 75:
+                mount = _mount60;
+                break;
+            case 150:
+                mount = _mount100;
+                break;
+            case 225:
+                if (canFly)
+                    mount = _mount150;
+                else
                     mount = _mount100;
-                    break;
-                case 225:
-                    if (canFly)
-                        mount = _mount150;
+                break;
+            case 300:
+                if (canFly)
+                {
+                    if (_mount310 && target->Has310Flyer(false))
+                        mount = _mount310;
                     else
-                        mount = _mount100;
-                    break;
-                case 300:
-                    if (canFly)
-                    {
-                        if (_mount310 && target->Has310Flyer(false))
-                            mount = _mount310;
-                        else
-                            mount = _mount280;
-                    }
-<<<<<<< HEAD
-
-                    if (mount)
-                    {
-                        PreventHitAura();
-                        target->CastSpell(target, mount, true);
-                    }
+                        mount = _mount280;
                 }
-            }
-
-            void Register() override
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_gen_mount_SpellScript::HandleMount, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-=======
-                    else
-                        mount = _mount100;
-                    break;
-                default:
-                    break;
->>>>>>> ef564c0c5cea546dcb76484b2528a06e5693816f
+                else
+                    mount = _mount100;
+                break;
+            default:
+                break;
             }
 
             if (mount)
@@ -4524,30 +4509,30 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_gen_lich_pet_aura);
     RegisterSpellScript(spell_gen_lich_pet_onsummon);
     RegisterSpellScript(spell_gen_lich_pet_aura_remove);
-    RegisterAuraScript(spell_gen_lifeblood);
-    RegisterAuraScript("spell_hexlord_lifebloom", SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL);
-    RegisterAuraScript("spell_tur_ragepaw_lifebloom", SPELL_TUR_RAGEPAW_LIFEBLOOM_FINAL_HEAL);
-    RegisterAuraScript("spell_cenarion_scout_lifebloom", SPELL_CENARION_SCOUT_LIFEBLOOM_FINAL_HEAL);
-    RegisterAuraScript("spell_twisted_visage_lifebloom", SPELL_TWISTED_VISAGE_LIFEBLOOM_FINAL_HEAL);
-    RegisterAuraScript("spell_faction_champion_dru_lifebloom", SPELL_FACTION_CHAMPIONS_DRU_LIFEBLOOM_FINAL_HEAL);
-    RegisterAuraScript("spell_magic_broom", 0, SPELL_MAGIC_BROOM_60, SPELL_MAGIC_BROOM_100, SPELL_MAGIC_BROOM_150, SPELL_MAGIC_BROOM_280);
-    RegisterSpellScript("spell_headless_horseman_mount", 0, SPELL_HEADLESS_HORSEMAN_MOUNT_60, SPELL_HEADLESS_HORSEMAN_MOUNT_100, SPELL_HEADLESS_HORSEMAN_MOUNT_150, SPELL_HEADLESS_HORSEMAN_MOUNT_280);
-    RegisterSpellScript("spell_winged_steed_of_the_ebon_blade", 0, 0, 0, SPELL_WINGED_STEED_150, SPELL_WINGED_STEED_280);
-    RegisterSpellScript("spell_big_blizzard_bear", 0, SPELL_BIG_BLIZZARD_BEAR_60, SPELL_BIG_BLIZZARD_BEAR_100);
-    RegisterSpellScript("spell_big_love_rocket", SPELL_BIG_LOVE_ROCKET_0, SPELL_BIG_LOVE_ROCKET_60, SPELL_BIG_LOVE_ROCKET_100, SPELL_BIG_LOVE_ROCKET_150, SPELL_BIG_LOVE_ROCKET_310);
-    RegisterSpellScript("spell_invincible", 0, SPELL_INVINCIBLE_60, SPELL_INVINCIBLE_100, SPELL_INVINCIBLE_150, SPELL_INVINCIBLE_310);
-    RegisterSpellScript("spell_blazing_hippogryph", 0, 0, 0, SPELL_BLAZING_HIPPOGRYPH_150, SPELL_BLAZING_HIPPOGRYPH_280);
-    RegisterSpellScript("spell_celestial_steed", 0, SPELL_CELESTIAL_STEED_60, SPELL_CELESTIAL_STEED_100, SPELL_CELESTIAL_STEED_150, SPELL_CELESTIAL_STEED_280, SPELL_CELESTIAL_STEED_310);
-    RegisterSpellScript("spell_x53_touring_rocket", 0, 0, 0, SPELL_X53_TOURING_ROCKET_150, SPELL_X53_TOURING_ROCKET_280, SPELL_X53_TOURING_ROCKET_310);
-    RegisterSpellScript("spell_tyreals_charger", 0, SPELL_TYREALS_CHARGER_60, SPELL_TYREALS_CHARGER_100, 0, 0, 0);
-    RegisterSpellScript("spell_warforged_nightmare", 0, SPELL_WARFORGED_NIGHTMARE_60, SPELL_WARFORGED_NIGHTMARE_100, SPELL_WARFORGED_NIGHTMARE_150, SPELL_WARFORGED_NIGHTMARE_280, SPELL_WARFORGED_NIGHTMARE_310);
-	RegisterSpellScript("spell_winged_guardian", 0, 0, 0, SPELL_WINGED_GUARDIAN_150, SPELL_WINGED_GUARDIAN_280, SPELL_WINGED_GUARDIAN_310);
-	RegisterSpellScript("spell_cindermane_charger", 0, SPELL_CINDERMANE_CHARGER_60, SPELL_CINDERMANE_CHARGER_100, 0, 0, 0);
-	RegisterSpellScript("spell_dread_raven", 0, 0, 0, SPELL_DREAD_RAVEN_150, SPELL_DREAD_RAVEN_280, SPELL_DREAD_RAVEN_310);
-	RegisterSpellScript("spell_heart_of_the_aspects", 0, 0, 0, SPELL_HEART_OF_THE_ASPECTS_150, SPELL_HEART_OF_THE_ASPECTS_280, SPELL_HEART_OF_THE_ASPECTS_310);
-	RegisterSpellScript("spell_enchanted_fey_dragon", 0, 0, 0, SPELL_ENCHANTED_FEY_DRAGON_150, SPELL_ENCHANTED_FEY_DRAGON_280, SPELL_ENCHANTED_FEY_DRAGON_310);
-	RegisterSpellScript("spell_grinning_reaver", 0, SPELL_GRINNING_REAVER_60, SPELL_GRINNING_REAVER_100, SPELL_GRINNING_REAVER_150, SPELL_GRINNING_REAVER_280, SPELL_GRINNING_REAVER_310);
-	RegisterSpellScript("spell_iron_skyreaver", 0, SPELL_IRON_SKYREAVER_60, SPELL_IRON_SKYREAVER_100, SPELL_IRON_SKYREAVER_150, SPELL_IRON_SKYREAVER_280, SPELL_IRON_SKYREAVER_310);
+    RegisterSpellScript(spell_gen_lifeblood);
+    RegisterSpellScriptWithArgs(spell_gen_lifebloom, "spell_hexlord_lifebloom", SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL);
+    RegisterSpellScriptWithArgs(spell_gen_lifebloom, "spell_tur_ragepaw_lifebloom", SPELL_TUR_RAGEPAW_LIFEBLOOM_FINAL_HEAL);
+    RegisterSpellScriptWithArgs(spell_gen_lifebloom, "spell_cenarion_scout_lifebloom", SPELL_CENARION_SCOUT_LIFEBLOOM_FINAL_HEAL);
+    RegisterSpellScriptWithArgs(spell_gen_lifebloom, "spell_twisted_visage_lifebloom", SPELL_TWISTED_VISAGE_LIFEBLOOM_FINAL_HEAL);
+    RegisterSpellScriptWithArgs(spell_gen_lifebloom, "spell_faction_champion_dru_lifebloom", SPELL_FACTION_CHAMPIONS_DRU_LIFEBLOOM_FINAL_HEAL);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_magic_broom", 0, SPELL_MAGIC_BROOM_60, SPELL_MAGIC_BROOM_100, SPELL_MAGIC_BROOM_150, SPELL_MAGIC_BROOM_280);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_headless_horseman_mount", 0, SPELL_HEADLESS_HORSEMAN_MOUNT_60, SPELL_HEADLESS_HORSEMAN_MOUNT_100, SPELL_HEADLESS_HORSEMAN_MOUNT_150, SPELL_HEADLESS_HORSEMAN_MOUNT_280);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_winged_steed_of_the_ebon_blade", 0, 0, 0, SPELL_WINGED_STEED_150, SPELL_WINGED_STEED_280);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_big_blizzard_bear", 0, SPELL_BIG_BLIZZARD_BEAR_60, SPELL_BIG_BLIZZARD_BEAR_100);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_big_love_rocket", SPELL_BIG_LOVE_ROCKET_0, SPELL_BIG_LOVE_ROCKET_60, SPELL_BIG_LOVE_ROCKET_100, SPELL_BIG_LOVE_ROCKET_150, SPELL_BIG_LOVE_ROCKET_310);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_invincible", 0, SPELL_INVINCIBLE_60, SPELL_INVINCIBLE_100, SPELL_INVINCIBLE_150, SPELL_INVINCIBLE_310);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_blazing_hippogryph", 0, 0, 0, SPELL_BLAZING_HIPPOGRYPH_150, SPELL_BLAZING_HIPPOGRYPH_280);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_celestial_steed", 0, SPELL_CELESTIAL_STEED_60, SPELL_CELESTIAL_STEED_100, SPELL_CELESTIAL_STEED_150, SPELL_CELESTIAL_STEED_280, SPELL_CELESTIAL_STEED_310);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_x53_touring_rocket", 0, 0, 0, SPELL_X53_TOURING_ROCKET_150, SPELL_X53_TOURING_ROCKET_280, SPELL_X53_TOURING_ROCKET_310);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_tyreals_charger", 0, SPELL_TYREALS_CHARGER_60, SPELL_TYREALS_CHARGER_100, 0, 0, 0);
+    RegisterSpellScriptWithArgs(spell_gen_mount, "spell_warforged_nightmare", 0, SPELL_WARFORGED_NIGHTMARE_60, SPELL_WARFORGED_NIGHTMARE_100, SPELL_WARFORGED_NIGHTMARE_150, SPELL_WARFORGED_NIGHTMARE_280, SPELL_WARFORGED_NIGHTMARE_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_winged_guardian", 0, 0, 0, SPELL_WINGED_GUARDIAN_150, SPELL_WINGED_GUARDIAN_280, SPELL_WINGED_GUARDIAN_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_cindermane_charger", 0, SPELL_CINDERMANE_CHARGER_60, SPELL_CINDERMANE_CHARGER_100, 0, 0, 0);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_dread_raven", 0, 0, 0, SPELL_DREAD_RAVEN_150, SPELL_DREAD_RAVEN_280, SPELL_DREAD_RAVEN_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_heart_of_the_aspects", 0, 0, 0, SPELL_HEART_OF_THE_ASPECTS_150, SPELL_HEART_OF_THE_ASPECTS_280, SPELL_HEART_OF_THE_ASPECTS_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_enchanted_fey_dragon", 0, 0, 0, SPELL_ENCHANTED_FEY_DRAGON_150, SPELL_ENCHANTED_FEY_DRAGON_280, SPELL_ENCHANTED_FEY_DRAGON_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_grinning_reaver", 0, SPELL_GRINNING_REAVER_60, SPELL_GRINNING_REAVER_100, SPELL_GRINNING_REAVER_150, SPELL_GRINNING_REAVER_280, SPELL_GRINNING_REAVER_310);
+	RegisterSpellScriptWithArgs(spell_gen_mount, "spell_iron_skyreaver", 0, SPELL_IRON_SKYREAVER_60, SPELL_IRON_SKYREAVER_100, SPELL_IRON_SKYREAVER_150, SPELL_IRON_SKYREAVER_280, SPELL_IRON_SKYREAVER_310);
     RegisterSpellScript(spell_gen_mounted_charge);
     RegisterSpellScript(spell_gen_moss_covered_feet);
     RegisterSpellScript(spell_gen_negative_energy_periodic);

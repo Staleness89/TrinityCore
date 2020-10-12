@@ -237,7 +237,6 @@ void AddKalimdorScripts()
     // AddSC_thousand_needles();
     AddSC_thunder_bluff();
 	AddSC_winterspring();
-	AddSC_kezan();
     // AddSC_ungoro_crater();
-    AddSC_winterspring();
+    AddSC_kezan();
 }
