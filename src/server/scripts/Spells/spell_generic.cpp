@@ -4355,7 +4355,7 @@ class spell_gen_skill_update : public SpellScript
     {
         SpellInfo const* spellInfo = GetSpellInfo();
         Player* target = GetHitPlayer();
-        target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
+       // target->UpdateSkill(spellInfo->Effects->MiscValue, spellInfo->Effects->MiscValueB);
     }
 
     void Register() override

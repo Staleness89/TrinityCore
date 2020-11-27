@@ -15,17 +15,17 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Darkshore
-SD%Complete: 100
-SDComment: Quest support: 731, 5321
-SDCategory: Darkshore
-EndScriptData */
+ /* ScriptData
+ SDName: Darkshore
+ SD%Complete: 100
+ SDComment: Quest support: 731, 5321
+ SDCategory: Darkshore
+ EndScriptData */
 
-/* ContentData
-npc_kerlonian
-npc_prospector_remtravel
-EndContentData */
+ /* ContentData
+ npc_kerlonian
+ npc_prospector_remtravel
+ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -35,23 +35,23 @@ EndContentData */
 #include "Player.h"
 #include "SpellInfo.h"
 
-/*####
-# npc_kerlonian
-####*/
+ /*####
+ # npc_kerlonian
+ ####*/
 
 enum Kerlonian
 {
-    SAY_KER_START               = 0,
-    EMOTE_KER_SLEEP             = 1,
-    SAY_KER_SLEEP               = 2,
-    SAY_KER_ALERT_1             = 3,
-    SAY_KER_END                 = 4,
-    EMOTE_KER_AWAKEN            = 5,
+    SAY_KER_START = 0,
+    EMOTE_KER_SLEEP = 1,
+    SAY_KER_SLEEP = 2,
+    SAY_KER_ALERT_1 = 3,
+    SAY_KER_END = 4,
+    EMOTE_KER_AWAKEN = 5,
 
-    SPELL_SLEEP_VISUAL          = 25148,
-    SPELL_AWAKEN                = 17536,
-    QUEST_SLEEPER_AWAKENED      = 5321,
-    NPC_LILADRIS                = 11219                    //attackers entries unknown
+    SPELL_SLEEP_VISUAL = 25148,
+    SPELL_AWAKEN = 17536,
+    QUEST_SLEEPER_AWAKENED = 5321,
+    NPC_LILADRIS = 11219                    //attackers entries unknown
 };
 
 /// @todo make concept similar as "ringo" -escort. Find a way to run the scripted attacks, _if_ player are choosing road.
@@ -86,7 +86,7 @@ public:
 
             if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_LILADRIS)
             {
-                if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE*5))
+                if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE * 5))
                 {
                     if (Player* player = GetLeaderForFollower())
                     {
@@ -176,24 +176,24 @@ public:
 
 enum Remtravel
 {
-    SAY_REM_START               = 0,
-    SAY_REM_AGGRO               = 1,
-    SAY_REM_RAMP1_1             = 2,
-    SAY_REM_RAMP1_2             = 3,
-    SAY_REM_BOOK                = 4,
-    SAY_REM_TENT1_1             = 5,
-    SAY_REM_TENT1_2             = 6,
-    SAY_REM_MOSS                = 7,
-    EMOTE_REM_MOSS              = 8,
-    SAY_REM_MOSS_PROGRESS       = 9,
-    SAY_REM_PROGRESS            = 10,
-    SAY_REM_REMEMBER            = 11,
-    EMOTE_REM_END               = 12,
+    SAY_REM_START = 0,
+    SAY_REM_AGGRO = 1,
+    SAY_REM_RAMP1_1 = 2,
+    SAY_REM_RAMP1_2 = 3,
+    SAY_REM_BOOK = 4,
+    SAY_REM_TENT1_1 = 5,
+    SAY_REM_TENT1_2 = 6,
+    SAY_REM_MOSS = 7,
+    EMOTE_REM_MOSS = 8,
+    SAY_REM_MOSS_PROGRESS = 9,
+    SAY_REM_PROGRESS = 10,
+    SAY_REM_REMEMBER = 11,
+    EMOTE_REM_END = 12,
 
-    QUEST_ABSENT_MINDED_PT2     = 731,
-    NPC_GRAVEL_SCOUT            = 2158,
-    NPC_GRAVEL_BONE             = 2159,
-    NPC_GRAVEL_GEO              = 2160
+    QUEST_ABSENT_MINDED_PT2 = 731,
+    NPC_GRAVEL_SCOUT = 2158,
+    NPC_GRAVEL_BONE = 2159,
+    NPC_GRAVEL_GEO = 2160
 };
 
 class npc_prospector_remtravel : public CreatureScript
@@ -225,57 +225,57 @@ public:
             {
                 switch (waypointId)
                 {
-                    case 0:
-                        Talk(SAY_REM_START, player);
-                        break;
-                    case 5:
-                        Talk(SAY_REM_RAMP1_1, player);
-                        break;
-                    case 6:
-                        DoSpawnCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        DoSpawnCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        break;
-                    case 9:
-                        Talk(SAY_REM_RAMP1_2, player);
-                        break;
-                    case 14:
-                        //depend quest rewarded?
-                        Talk(SAY_REM_BOOK, player);
-                        break;
-                    case 15:
-                        Talk(SAY_REM_TENT1_1, player);
-                        break;
-                    case 16:
-                        DoSpawnCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        DoSpawnCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        break;
-                    case 17:
-                        Talk(SAY_REM_TENT1_2, player);
-                        break;
-                    case 26:
-                        Talk(SAY_REM_MOSS, player);
-                        break;
-                    case 27:
-                        Talk(EMOTE_REM_MOSS, player);
-                        break;
-                    case 28:
-                        Talk(SAY_REM_MOSS_PROGRESS, player);
-                        break;
-                    case 29:
-                        DoSpawnCreature(NPC_GRAVEL_SCOUT, -15.0f, 3.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        DoSpawnCreature(NPC_GRAVEL_BONE, -15.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        DoSpawnCreature(NPC_GRAVEL_GEO, -15.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
-                        break;
-                    case 31:
-                        Talk(SAY_REM_PROGRESS, player);
-                        break;
-                    case 41:
-                        Talk(SAY_REM_REMEMBER, player);
-                        break;
-                    case 42:
-                        Talk(EMOTE_REM_END, player);
-                        player->GroupEventHappens(QUEST_ABSENT_MINDED_PT2, me);
-                        break;
+                case 0:
+                    Talk(SAY_REM_START, player);
+                    break;
+                case 5:
+                    Talk(SAY_REM_RAMP1_1, player);
+                    break;
+                case 6:
+                    DoSpawnCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    DoSpawnCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    break;
+                case 9:
+                    Talk(SAY_REM_RAMP1_2, player);
+                    break;
+                case 14:
+                    //depend quest rewarded?
+                    Talk(SAY_REM_BOOK, player);
+                    break;
+                case 15:
+                    Talk(SAY_REM_TENT1_1, player);
+                    break;
+                case 16:
+                    DoSpawnCreature(NPC_GRAVEL_SCOUT, -10.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    DoSpawnCreature(NPC_GRAVEL_BONE, -10.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    break;
+                case 17:
+                    Talk(SAY_REM_TENT1_2, player);
+                    break;
+                case 26:
+                    Talk(SAY_REM_MOSS, player);
+                    break;
+                case 27:
+                    Talk(EMOTE_REM_MOSS, player);
+                    break;
+                case 28:
+                    Talk(SAY_REM_MOSS_PROGRESS, player);
+                    break;
+                case 29:
+                    DoSpawnCreature(NPC_GRAVEL_SCOUT, -15.0f, 3.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    DoSpawnCreature(NPC_GRAVEL_BONE, -15.0f, 5.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    DoSpawnCreature(NPC_GRAVEL_GEO, -15.0f, 7.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30s);
+                    break;
+                case 31:
+                    Talk(SAY_REM_PROGRESS, player);
+                    break;
+                case 41:
+                    Talk(SAY_REM_REMEMBER, player);
+                    break;
+                case 42:
+                    Talk(EMOTE_REM_END, player);
+                    player->GroupEventHappens(QUEST_ABSENT_MINDED_PT2, me);
+                    break;
                 }
             }
         }
@@ -299,87 +299,6 @@ public:
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_prospector_remtravelAI(creature);
-    }
-};
-
-/*####
-# npc_threshwackonator
-####*/
-
-enum Threshwackonator
-{
-    EMOTE_START             = 0,
-    SAY_AT_CLOSE            = 0,
-    QUEST_GYROMAST_REV      = 2078,
-    NPC_GELKAK              = 6667
-};
-
-#define GOSSIP_ITEM_INSERT_KEY  "[PH] Insert key"
-
-class npc_threshwackonator : public CreatureScript
-{
-public:
-    npc_threshwackonator() : CreatureScript("npc_threshwackonator") { }
-
-    struct npc_threshwackonatorAI : public FollowerAI
-    {
-        npc_threshwackonatorAI(Creature* creature) : FollowerAI(creature) { }
-
-        void Reset() override { }
-
-        void MoveInLineOfSight(Unit* who) override
-
-        {
-            FollowerAI::MoveInLineOfSight(who);
-
-            if (!me->GetVictim() && !HasFollowState(STATE_FOLLOW_COMPLETE) && who->GetEntry() == NPC_GELKAK)
-            {
-                if (me->IsWithinDistInMap(who, 10.0f))
-                {
-                    who->ToCreature()->AI()->Talk(SAY_AT_CLOSE, who);
-                    DoAtEnd();
-                }
-            }
-        }
-
-        void DoAtEnd()
-        {
-            me->SetFaction(FACTION_MONSTER);
-
-            if (Player* pHolder = GetLeaderForFollower())
-				me->Attack(pHolder, true);
-
-            SetFollowComplete(true);
-        }
-
-        bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
-        {
-            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            ClearGossipMenuFor(player);
-            if (action == GOSSIP_ACTION_INFO_DEF + 1)
-            {
-                CloseGossipMenuFor(player);
-
-                Talk(EMOTE_START);
-                StartFollow(player);
-            }
-
-            return true;
-        }
-
-        bool GossipHello(Player* player) override
-        {
-            if (player->GetQuestStatus(QUEST_GYROMAST_REV) == QUEST_STATUS_INCOMPLETE)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_ITEM_INSERT_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-            return true;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_threshwackonatorAI(creature);
     }
 };
 
